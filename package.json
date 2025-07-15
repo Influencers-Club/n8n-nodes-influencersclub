@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-influencersclub",
   "version": "1.0.0",
-  "description": "Official n8n nodes for Influencers Club enrichment API (Enrich by Email and Handle).",
+  "description": "Official n8n nodes for Influencers Club.",
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
@@ -24,7 +24,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR_USERNAME/n8n-nodes-influencersclub.git"
+    "url": "https://github.com/Influencers-Club/n8n-nodes-influencersclub"
   },
   "dependencies": {
     "n8n-core": "^1.0.0",
