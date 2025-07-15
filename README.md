@@ -4,11 +4,16 @@ Official n8n nodes for Influencers Club enrichment API.
 
 ## 🚀 Overview
 
-This repository provides two official n8n nodes for Influencers Club:
+This repository provides four official n8n nodes for Influencers Club:
 
 - **Enrich by Email**: Takes an email address and enriches it with public social data, including possible usernames, followers, profile links, bio, and other social metrics. This is useful if you have a list of customer or subscriber emails and want to find their social presence and additional profile information.
 
 - **Enrich by Handle**: Takes a social media handle (username) and platform, and enriches it with email (if available), followers, bio, links, and additional social metrics. This is useful if you have scraped or collected social handles and want to obtain verified emails or extra data.
+
+- **Discovery**: Search for creators using advanced filters such as keyword, platform, audience country, follower range, engagement rate, and more. The node provides full flexibility and matches the official API documentation.
+
+- **Find Lookalikes**: Find similar creators to a given handle on a specified platform. This is useful for building lookalike lists for outreach or audience expansion.
+
 
 These nodes help marketing and growth teams enrich leads, segment audiences, sync to CRM systems, or prepare personalized outreach workflows.
 
