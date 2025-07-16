@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-influencersclub",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Official n8n nodes for Influencers Club.",
   "main": "index.js",
   "types": "index.d.ts",
