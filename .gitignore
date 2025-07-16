@@ -1,6 +1,3 @@
 node_modules/
-dist/
 *.log
 *.tsbuildinfo
-*.js
-*.js.map
