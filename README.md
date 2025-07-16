@@ -73,7 +73,7 @@ Even with correct code, your package **must be loaded by n8n** correctly (custom
 
 ```powershell
 $env:N8N_CUSTOM_EXTENSIONS="n8n-nodes-influencersclub"; npx n8n start
----
+```
 
 ## 📄 License
 
