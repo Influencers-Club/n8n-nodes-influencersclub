@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint nodes/**/*.ts index.ts",
     "prepublishOnly": "npm run build && npm run lint"
   },
   "author": "Influencers Club <support@influencers.club>",
