@@ -1,16 +1,20 @@
 {
   "name": "n8n-nodes-influencersclub",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Official n8n nodes for Influencers Club.",
-  "main": "index.js",
-  "types": "index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "lint": "eslint . --ext .ts",
+    "prepublishOnly": "npm run build && npm run lint"
   },
   "author": "Influencers Club <support@influencers.club>",
   "license": "MIT",
   "keywords": [
     "n8n",
+    "n8n-community-node-package",
     "node",
     "workflow",
     "automation",
@@ -26,6 +30,14 @@
     "type": "git",
     "url": "https://github.com/Influencers-Club/n8n-nodes-influencersclub"
   },
+  "n8n": {
+    "nodes": [
+      "dist/nodes/EnrichByEmail.node.js",
+      "dist/nodes/EnrichByHandle.node.js",
+      "dist/nodes/Discovery.node.js",
+      "dist/nodes/FindLookalikes.node.js"
+    ]
+  },
   "dependencies": {
     "n8n-core": "^1.0.0",
     "n8n-workflow": "^1.0.0"
@@ -34,11 +46,12 @@
     "node": ">=20.19 <=24.x"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
     "typescript": "^5.8.3"
   },
   "files": [
-    "dist",
-    "nodes",
-    "index.js"
+    "dist"
   ]
 }
