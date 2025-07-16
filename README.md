@@ -50,13 +50,9 @@ Install via npm:
 
 ```bash
 npm install n8n-nodes-influencersclub
+```
 Then, add to your n8n instance as a custom node package.
 
-yaml
-Copy
-Edit
-
----
 
 # 💥 **Why your nodes do not appear yet**
 
