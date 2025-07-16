@@ -46,8 +46,37 @@ Paste this key into the "API Key" field inside each node in your n8n workflow.
 
 ## 🛠️ Installation
 
-_Coming soon_ — these nodes will be published to npm and n8n Community Nodes.
+Install via npm:
 
+```bash
+npm install n8n-nodes-influencersclub
+Then, add to your n8n instance as a custom node package.
+
+yaml
+Copy
+Edit
+
+---
+
+# 💥 **Why your nodes do not appear yet**
+
+Even with correct code, your package **must be loaded by n8n** correctly (custom extensions or Community Nodes). Right now:
+
+- **You are using local env variable method**: `$env:N8N_CUSTOM_EXTENSIONS="n8n-nodes-influencersclub"`.
+- The package and dist files must include **built `.js` files**, not just `.ts`.
+- Your `dist/` folder must be correctly built and included in npm (which you did recently).  
+
+---
+
+# ✅ **Next steps (final confirmation)**
+
+1️⃣ Your **code is now correct** — confirmed.  
+2️⃣ Your **npm package is correct** — confirmed.  
+3️⃣ Your **README** can be updated (optional).  
+4️⃣ You need to make sure your local n8n actually loads the package correctly:
+
+```powershell
+$env:N8N_CUSTOM_EXTENSIONS="n8n-nodes-influencersclub"; npx n8n start
 ---
 
 ## 📄 License

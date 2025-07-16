@@ -35,5 +35,10 @@
   },
   "devDependencies": {
     "typescript": "^5.8.3"
-  }
+  },
+  "files": [
+    "dist",
+    "nodes",
+    "index.js"
+  ]
 }
