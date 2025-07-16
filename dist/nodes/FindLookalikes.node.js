@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.FindLookalikes = void 0;
-class FindLookalikes {
+export class FindLookalikes {
     constructor() {
         this.description = {
             displayName: "Find Lookalikes",
@@ -68,4 +65,3 @@ class FindLookalikes {
         return [this.helpers.returnJsonArray([response])];
     }
 }
-exports.FindLookalikes = FindLookalikes;

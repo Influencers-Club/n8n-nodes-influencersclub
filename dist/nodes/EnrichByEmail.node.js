@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnrichByEmail = void 0;
-class EnrichByEmail {
+export class EnrichByEmail {
     constructor() {
         this.description = {
             displayName: "Enrich by Email",
@@ -50,4 +47,3 @@ class EnrichByEmail {
         return [this.helpers.returnJsonArray([response])];
     }
 }
-exports.EnrichByEmail = EnrichByEmail;

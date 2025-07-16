@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Discovery = void 0;
-class Discovery {
+export class Discovery {
     constructor() {
         this.description = {
             displayName: "Discovery",
@@ -132,4 +129,3 @@ class Discovery {
         return [this.helpers.returnJsonArray([response])];
     }
 }
-exports.Discovery = Discovery;
