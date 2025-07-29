@@ -1,16 +1,9 @@
-import { EnrichByEmail } from "./nodes/EnrichByEmail.node.js";
-import { EnrichByHandle } from "./nodes/EnrichByHandle.node.js";
-import { Discovery } from "./nodes/Discovery.node.js";
-import { FindLookalikes } from "./nodes/FindLookalikes.node.js";
+import { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
+import { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";
 
-export const nodes = [
-	EnrichByEmail,
-	EnrichByHandle,
-	Discovery,
-	FindLookalikes,
-];
+export const nodes = [InfluencersClub];
 
-export { EnrichByEmail } from "./nodes/EnrichByEmail.node.js";
-export { EnrichByHandle } from "./nodes/EnrichByHandle.node.js";
-export { Discovery } from "./nodes/Discovery.node.js";
-export { FindLookalikes } from "./nodes/FindLookalikes.node.js";
+export const credentials = [InfluencersClubApi];
+
+export { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
+export { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";

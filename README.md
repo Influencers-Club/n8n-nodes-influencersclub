@@ -1,10 +1,10 @@
 # n8n-nodes-influencersclub
 
-Official n8n nodes for Influencers Club enrichment and discovery API.
+Official n8n node for Influencers Club enrichment and discovery API.
 
 ## 🚀 Overview
 
-This repository provides four official n8n nodes for Influencers Club:
+This repository provides an official n8n node for Influencers Club with four operations:
 
 - **Enrich by Email**: Takes an email address and enriches it with public social data, including possible usernames, followers, profile links, bio, and other social metrics. This is useful if you have a list of customer or subscriber emails and want to find their social presence and additional profile information.
 
@@ -14,14 +14,13 @@ This repository provides four official n8n nodes for Influencers Club:
 
 - **Find Lookalikes**: Find similar creators to a given handle on a specified platform. This is useful for building lookalike lists for outreach or audience expansion.
 
-
-These nodes help marketing and growth teams enrich leads, segment audiences, sync to CRM systems, or prepare personalized outreach workflows.
+These operations help marketing and growth teams enrich leads, segment audiences, sync to CRM systems, or prepare personalized outreach workflows.
 
 ---
 
 ## 🔑 How to get your API Key
 
-To use these nodes, you need an **API Key** from your Influencers Club account.
+To use this node, you need an **API Key** from your Influencers Club account.
 
 ### Steps
 
@@ -31,16 +30,16 @@ To use these nodes, you need an **API Key** from your Influencers Club account.
 
 **All requests require a Bearer token:**
 
-
-
-Paste this key into the "API Key" field inside each node in your n8n workflow.
+Paste this key into the "Influencers Club API" credentials in your n8n workflow.
 
 ---
 
 ## ⚡ Example workflows
 
-- Import a list of email addresses from Google Sheets ➜ Enrich by Email ➜ Push to CRM or Airtable.
-- Import a list of Instagram handles ➜ Enrich by Handle ➜ Get emails ➜ Send personalized outreach via Gmail node.
+- Import a list of email addresses from Google Sheets ➜ Influencers Club (Enrich by Email) ➜ Push to CRM or Airtable.
+- Import a list of Instagram handles ➜ Influencers Club (Enrich by Handle) ➜ Get emails ➜ Send personalized outreach via Gmail node.
+- Search for creators in your niche ➜ Influencers Club (Discovery) ➜ Filter and export to spreadsheet.
+- Find similar creators ➜ Influencers Club (Find Lookalikes) ➜ Build outreach lists.
 
 ---
 
@@ -51,8 +50,10 @@ Install via npm:
 ```bash
 npm install n8n-nodes-influencersclub
 ```
+
 Then, add to your n8n instance as a custom node package.
 
+---
 
 ## 📄 License
 

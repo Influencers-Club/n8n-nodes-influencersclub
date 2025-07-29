@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-influencersclub",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Official n8n nodes for Influencers Club.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -31,11 +31,11 @@
     "url": "https://github.com/Influencers-Club/n8n-nodes-influencersclub"
   },
   "n8n": {
+    "credentials": [
+      "dist/credentials/InfluencersClubApi.credentials.js"
+    ],
     "nodes": [
-      "dist/nodes/EnrichByEmail.node.js",
-      "dist/nodes/EnrichByHandle.node.js",
-      "dist/nodes/Discovery.node.js",
-      "dist/nodes/FindLookalikes.node.js"
+      "dist/nodes/InfluencersClub/InfluencersClub.node.js"
     ]
   },
   "dependencies": {
@@ -49,8 +49,8 @@
     "@typescript-eslint/eslint-plugin": "^8.37.0",
     "@typescript-eslint/parser": "^8.37.0",
     "eslint": "^9.31.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "ts-node": "^10.9.2"
   },
   "files": [
     "dist"

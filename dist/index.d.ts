@@ -1,6 +1,6 @@
-import { Discovery } from "./nodes/Discovery.node.js";
-export declare const nodes: (typeof Discovery)[];
-export { EnrichByEmail } from "./nodes/EnrichByEmail.node.js";
-export { EnrichByHandle } from "./nodes/EnrichByHandle.node.js";
-export { Discovery } from "./nodes/Discovery.node.js";
-export { FindLookalikes } from "./nodes/FindLookalikes.node.js";
+import { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
+import { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";
+export declare const nodes: (typeof InfluencersClub)[];
+export declare const credentials: (typeof InfluencersClubApi)[];
+export { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
+export { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";
