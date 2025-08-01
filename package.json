@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-influencersclub",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Official n8n nodes for Influencers Club.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -54,6 +54,7 @@
     "ts-node": "^10.9.2"
   },
   "files": [
-    "dist"
+    "dist",
+    "nodes/**/*.svg"
   ]
 }
