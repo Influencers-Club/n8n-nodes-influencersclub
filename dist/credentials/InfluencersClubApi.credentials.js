@@ -19,5 +19,22 @@ export class InfluencersClubApi {
                 required: true,
             },
         ];
+        this.test = {
+            request: {
+                url: 'https://api-dashboard.influencers.club/public/v1/enrichment/creators/enrich-by-email/',
+                method: 'POST',
+                body: {
+                    email: 'test@example.com',
+                    include_connected_platforms_data: false,
+                    include_income_data: false,
+                    only_above_1000_followers: false,
+                    exclude_social_media: []
+                },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer {{$credentials.influencersClubApi.apiKey}}',
+                },
+            },
+        };
     }
 }

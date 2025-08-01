@@ -1,4 +1,9 @@
-import { ICredentialType, INodeProperties } from "n8n-workflow";
+import { 
+	ICredentialType, 
+	INodeProperties, 
+	ICredentialTestRequest,
+	IHttpRequestOptions 
+} from "n8n-workflow";
 
 export class InfluencersClubApi implements ICredentialType {
 	name = "influencersClubApi";
@@ -20,4 +25,22 @@ export class InfluencersClubApi implements ICredentialType {
 			required: true,
 		},
 	];
+
+	test: ICredentialTestRequest = {
+		request: {
+			url: 'https://api-dashboard.influencers.club/public/v1/enrichment/creators/enrich-by-email/',
+			method: 'POST',
+			body: {
+				email: 'test@example.com',
+				include_connected_platforms_data: false,
+				include_income_data: false,
+				only_above_1000_followers: false,
+				exclude_social_media: []
+			},
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': 'Bearer {{$credentials.influencersClubApi.apiKey}}',
+			},
+		},
+	};
 } 

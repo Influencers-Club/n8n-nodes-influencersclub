@@ -1144,6 +1144,7 @@ export class InfluencersClub implements INodeType {
 		],
 	};
 
+	// eslint-disable-next-line no-unused-vars
 	async execute(this: IExecuteFunctions) {
 		const operation = this.getNodeParameter("operation", 0) as string;
 		const credentials = await this.getCredentials("influencersClubApi");
@@ -1309,7 +1310,7 @@ export class InfluencersClub implements INodeType {
 						};
 					}
 					if (instagramFilters.has_merch !== undefined) apiFilters.has_merch = instagramFilters.has_merch;
-					if (instagramFilters.keywords_in_bio && typeof instagramFilters.keywords_in_bio === 'string') {
+					if (instagramFilters.keywords_in_bio && typeof instagramFilters.keywords_in_bio === "string") {
 						apiFilters.keywords_in_bio = instagramFilters.keywords_in_bio.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
 					if (instagramFilters.last_post) apiFilters.last_post = instagramFilters.last_post;
@@ -1340,10 +1341,10 @@ export class InfluencersClub implements INodeType {
 							max: youtubeFilters.max_average_views_on_shorts || null,
 						};
 					}
-					if (youtubeFilters.keywords_in_video_titles && typeof youtubeFilters.keywords_in_video_titles === 'string') {
+					if (youtubeFilters.keywords_in_video_titles && typeof youtubeFilters.keywords_in_video_titles === "string") {
 						apiFilters.keywords_in_video_titles = youtubeFilters.keywords_in_video_titles.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
-					if (youtubeFilters.keywords_in_description && typeof youtubeFilters.keywords_in_description === 'string') {
+					if (youtubeFilters.keywords_in_description && typeof youtubeFilters.keywords_in_description === "string") {
 						apiFilters.keywords_in_description = youtubeFilters.keywords_in_description.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
 					if (youtubeFilters.subscriber_growth_percentage || youtubeFilters.subscriber_growth_time_range_months) {
@@ -1370,7 +1371,7 @@ export class InfluencersClub implements INodeType {
 							max: tiktokFilters.max_number_of_videos || null,
 						};
 					}
-					if (tiktokFilters.keywords_in_video_description && typeof tiktokFilters.keywords_in_video_description === 'string') {
+					if (tiktokFilters.keywords_in_video_description && typeof tiktokFilters.keywords_in_video_description === "string") {
 						apiFilters.keywords_in_video_description = tiktokFilters.keywords_in_video_description.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
 					if (tiktokFilters.has_tik_tok_shop !== undefined) apiFilters.has_tik_tok_shop = tiktokFilters.has_tik_tok_shop;
@@ -1383,7 +1384,7 @@ export class InfluencersClub implements INodeType {
 							max: twitterFilters.max_number_of_tweets || null,
 						};
 					}
-					if (twitterFilters.keywords_in_tweets && typeof twitterFilters.keywords_in_tweets === 'string') {
+					if (twitterFilters.keywords_in_tweets && typeof twitterFilters.keywords_in_tweets === "string") {
 						apiFilters.keywords_in_tweets = twitterFilters.keywords_in_tweets.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
 				}
@@ -1452,7 +1453,7 @@ export class InfluencersClub implements INodeType {
 							max: twitchFilters.max_streams_count_last_30_days || null,
 						};
 					}
-					if (twitchFilters.games_played && typeof twitchFilters.games_played === 'string') {
+					if (twitchFilters.games_played && typeof twitchFilters.games_played === "string") {
 						apiFilters.games_played = twitchFilters.games_played.split(",").map((k: string) => k.trim()).filter((k: string) => k);
 					}
 					if (twitchFilters.is_twitch_partner !== undefined) apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
