@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-influencersclub",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Official n8n nodes for Influencers Club.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -40,8 +40,7 @@
       "dist/nodes/InfluencersClub/InfluencersClub.node.js"
     ]
   },
-  "dependencies": {
-    "n8n-core": "^1.0.0",
+  "peerDependencies": {
     "n8n-workflow": "^1.0.0"
   },
   "engines": {
