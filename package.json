@@ -4,7 +4,7 @@
   "description": "Official n8n nodes for Influencers Club.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "type": "module",
+  "type": "commonjs",
   "scripts": {
     "build": "tsc",
     "lint": "eslint nodes/**/*.ts index.ts",

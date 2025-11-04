@@ -1,10 +1,22 @@
-export class InfluencersClubApi {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InfluencersClubApi = void 0;
+class InfluencersClubApi {
     constructor() {
         this.name = "influencersClubApi";
         this.displayName = "Influencers Club API";
         this.documentationUrl = "https://dashboard.influencers.club/api";
         this.defaults = {
             name: "Influencers Club API",
+        };
+        this.authenticate = {
+            type: "generic",
+            properties: {
+                headers: {
+                    Authorization: "=Bearer {{$credentials.apiKey}}",
+                    "Content-Type": "application/json",
+                },
+            },
         };
         this.properties = [
             {
@@ -21,20 +33,15 @@ export class InfluencersClubApi {
         ];
         this.test = {
             request: {
-                url: 'https://api-dashboard.influencers.club/public/v1/enrichment/creators/enrich-by-email/',
+                url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/advanced/',
                 method: 'POST',
                 body: {
                     email: 'test@example.com',
-                    include_connected_platforms_data: false,
-                    include_income_data: false,
-                    only_above_1000_followers: false,
-                    exclude_social_media: []
-                },
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer {{$credentials.influencersClubApi.apiKey}}',
+                    exclude_platforms: [],
+                    min_followers: 1000,
                 },
             },
         };
     }
 }
+exports.InfluencersClubApi = InfluencersClubApi;

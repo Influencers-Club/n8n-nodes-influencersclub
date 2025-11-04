@@ -2,7 +2,8 @@ import {
 	ICredentialType, 
 	INodeProperties, 
 	ICredentialTestRequest,
-	IHttpRequestOptions 
+	IHttpRequestOptions, 
+	IAuthenticateGeneric
 } from "n8n-workflow";
 
 export class InfluencersClubApi implements ICredentialType {
@@ -11,6 +12,16 @@ export class InfluencersClubApi implements ICredentialType {
 	documentationUrl = "https://dashboard.influencers.club/api";
 	defaults = {
 		name: "Influencers Club API",
+	};
+
+	authenticate: IAuthenticateGeneric = {
+		type: "generic",
+		properties: {
+			headers: {
+				Authorization: "=Bearer {{$credentials.apiKey}}",
+				"Content-Type": "application/json",
+			},
+		},
 	};
 	properties: INodeProperties[] = [
 		{
@@ -28,18 +39,12 @@ export class InfluencersClubApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			url: 'https://api-dashboard.influencers.club/public/v1/enrichment/creators/enrich-by-email/',
+			url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/advanced/',
 			method: 'POST',
 			body: {
 				email: 'test@example.com',
-				include_connected_platforms_data: false,
-				include_income_data: false,
-				only_above_1000_followers: false,
-				exclude_social_media: []
-			},
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': 'Bearer {{$credentials.influencersClubApi.apiKey}}',
+				exclude_platforms: [],
+				min_followers: 1000,
 			},
 		},
 	};

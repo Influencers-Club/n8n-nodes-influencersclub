@@ -1,6 +1,11 @@
-import { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
-import { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";
-export const nodes = [InfluencersClub];
-export const credentials = [InfluencersClubApi];
-export { InfluencersClub } from "./nodes/InfluencersClub/InfluencersClub.node.js";
-export { InfluencersClubApi } from "./credentials/InfluencersClubApi.credentials.js";
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.InfluencersClubApi = exports.InfluencersClub = exports.credentials = exports.nodes = void 0;
+const InfluencersClub_node_1 = require("./nodes/InfluencersClub/InfluencersClub.node");
+const InfluencersClubApi_credentials_1 = require("./credentials/InfluencersClubApi.credentials");
+exports.nodes = [InfluencersClub_node_1.InfluencersClub];
+exports.credentials = [InfluencersClubApi_credentials_1.InfluencersClubApi];
+var InfluencersClub_node_2 = require("./nodes/InfluencersClub/InfluencersClub.node");
+Object.defineProperty(exports, "InfluencersClub", { enumerable: true, get: function () { return InfluencersClub_node_2.InfluencersClub; } });
+var InfluencersClubApi_credentials_2 = require("./credentials/InfluencersClubApi.credentials");
+Object.defineProperty(exports, "InfluencersClubApi", { enumerable: true, get: function () { return InfluencersClubApi_credentials_2.InfluencersClubApi; } });
