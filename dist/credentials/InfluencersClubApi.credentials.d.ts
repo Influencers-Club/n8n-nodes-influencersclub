@@ -1,4 +1,4 @@
-import { ICredentialType, INodeProperties, ICredentialTestRequest } from "n8n-workflow";
+import { ICredentialType, INodeProperties, ICredentialTestRequest, IAuthenticateGeneric } from "n8n-workflow";
 export declare class InfluencersClubApi implements ICredentialType {
     name: string;
     displayName: string;
@@ -6,6 +6,7 @@ export declare class InfluencersClubApi implements ICredentialType {
     defaults: {
         name: string;
     };
+    authenticate: IAuthenticateGeneric;
     properties: INodeProperties[];
     test: ICredentialTestRequest;
 }
