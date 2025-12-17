@@ -1,6 +1,6 @@
 # n8n-nodes-influencersclub
 
-Official n8n node for Influencers Club enrichment and discovery API.
+Official n8n node for [Influencers Club enrichment and discovery API](https://influencers.club/influencer-api/).
 
 ## 🚀 Overview
 
