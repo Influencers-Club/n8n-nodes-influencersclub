@@ -15,6 +15,8 @@ class InfluencersClubApi {
                 headers: {
                     Authorization: "=Bearer {{$credentials.apiKey}}",
                     "Content-Type": "application/json",
+                    "X-Origin": "n8n",
+                    "X-Integration": "influencers-n8n",
                 },
             },
         };
@@ -33,12 +35,10 @@ class InfluencersClubApi {
         ];
         this.test = {
             request: {
-                url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/advanced/',
+                url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/',
                 method: 'POST',
                 body: {
                     email: 'test@example.com',
-                    exclude_platforms: [],
-                    min_followers: 1000,
                 },
             },
         };

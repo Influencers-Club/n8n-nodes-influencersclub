@@ -20,6 +20,8 @@ export class InfluencersClubApi implements ICredentialType {
 			headers: {
 				Authorization: "=Bearer {{$credentials.apiKey}}",
 				"Content-Type": "application/json",
+				"X-Origin": "n8n",
+				"X-Integration": "influencers-n8n",
 			},
 		},
 	};
@@ -39,12 +41,10 @@ export class InfluencersClubApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/advanced/',
+			url: 'https://api-dashboard.influencers.club/public/v1/creators/enrich/email/',
 			method: 'POST',
 			body: {
 				email: 'test@example.com',
-				exclude_platforms: [],
-				min_followers: 1000,
 			},
 		},
 	};
