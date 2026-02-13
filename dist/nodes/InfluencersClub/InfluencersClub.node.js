@@ -301,7 +301,7 @@ class InfluencersClub {
                                     name: "include_lookalikes",
                                     type: "boolean",
                                     default: false,
-                                    description: "Include similar creators in the response",
+                                    description: "Whether to include similar creators in the response",
                                     displayOptions: {
                                         show: {
                                             resource: ["creator"],
@@ -1697,7 +1697,7 @@ class InfluencersClub {
                             .map((e) => e.trim())
                             .filter(Boolean);
                         if (emails.length === 0) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), "At least one email is required for Create Batch Enrichment", { itemIndex });
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), "At least one email is required. Add one or more emails in the Emails field (one per line or comma-separated).", { itemIndex });
                         }
                         const body = { emails };
                         const options = {
