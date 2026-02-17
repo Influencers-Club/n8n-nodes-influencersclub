@@ -180,6 +180,73 @@ export class InfluencersClub implements INodeType {
 					},
 				},
 			},
+			// Discovery: Platform, Paging, Sort at top (matches API runner)
+			{
+				displayName: "Platform",
+				name: "discovery_platform",
+				type: "options",
+				options: [
+					{ name: "Instagram", value: "instagram" },
+					{ name: "YouTube", value: "youtube" },
+					{ name: "TikTok", value: "tiktok" },
+					{ name: "Twitch", value: "twitch" },
+					{ name: "Twitter", value: "twitter" },
+					{ name: "OnlyFans", value: "onlyfans" },
+				],
+				default: "instagram",
+				required: true,
+				description: "Platform to discover creators on (required by Discovery API)",
+				displayOptions: {
+					show: {
+						resource: ["discovery"],
+						operation: ["discovery"],
+					},
+				},
+			},
+			{
+				displayName: "Limit",
+				name: "discovery_limit",
+				type: "number",
+				default: 5,
+				description: "Number of creators per page (paging object)",
+				displayOptions: {
+					show: {
+						resource: ["discovery"],
+						operation: ["discovery"],
+					},
+				},
+			},
+			{
+				displayName: "Page",
+				name: "discovery_page",
+				type: "number",
+				default: 0,
+				description: "Page index for pagination (paging object)",
+				displayOptions: {
+					show: {
+						resource: ["discovery"],
+						operation: ["discovery"],
+					},
+				},
+			},
+			{
+				displayName: "Sort By",
+				name: "discovery_sort_by",
+				type: "options",
+				options: [
+					{ name: "Relevancy", value: "relevancy" },
+					{ name: "Engagement Rate", value: "engagement_rate" },
+					{ name: "Number of Followers", value: "number_of_followers" },
+				],
+				default: "relevancy",
+				description: "Sort creators by (sort object)",
+				displayOptions: {
+					show: {
+						resource: ["discovery"],
+						operation: ["discovery"],
+					},
+				},
+			},
 			// Enrich by Email parameters
 			{
 				displayName: "Email",
@@ -229,6 +296,27 @@ export class InfluencersClub implements INodeType {
 					},
 				},
 			},
+			{
+				displayName: "Platform",
+				name: "lookalikes_platform",
+				type: "options",
+				options: [
+					{ name: "Instagram", value: "instagram" },
+					{ name: "TikTok", value: "tiktok" },
+					{ name: "YouTube", value: "youtube" },
+					{ name: "Twitch", value: "twitch" },
+					{ name: "OnlyFans", value: "onlyfans" },
+				],
+				default: "instagram",
+				required: true,
+				description: "Platform of the reference creator (Lookalikes / Similar API)",
+				displayOptions: {
+					show: {
+						resource: ["creator"],
+						operation: ["findLookalikes"],
+					},
+				},
+			},
 			// Enrich by Handle parameters
 			{
 				displayName: "Handle",
@@ -250,18 +338,11 @@ export class InfluencersClub implements INodeType {
 				type: "options",
 				options: [
 					{ name: "Instagram", value: "instagram" },
-					{ name: "TikTok", value: "tiktok" },
 					{ name: "YouTube", value: "youtube" },
+					{ name: "TikTok", value: "tiktok" },
+					{ name: "Twitch", value: "twitch" },
 					{ name: "Twitter", value: "twitter" },
 					{ name: "OnlyFans", value: "onlyfans" },
-					{ name: "Patreon", value: "patreon" },
-					{ name: "Twitch", value: "twitch" },
-					{ name: "Reddit", value: "reddit" },
-					{ name: "LinkedIn", value: "linkedin" },
-					{ name: "Pinterest", value: "pinterest" },
-					{ name: "Discord", value: "discord" },
-					{ name: "Snapchat", value: "snapchat" },
-					{ name: "Facebook", value: "facebook" },
 				],
 				default: "instagram",
 				required: true,
@@ -342,18 +423,11 @@ export class InfluencersClub implements INodeType {
 								type: "options",
 								options: [
 									{ name: "Instagram", value: "instagram" },
-									{ name: "TikTok", value: "tiktok" },
 									{ name: "YouTube", value: "youtube" },
+									{ name: "TikTok", value: "tiktok" },
+									{ name: "Twitch", value: "twitch" },
 									{ name: "Twitter", value: "twitter" },
 									{ name: "OnlyFans", value: "onlyfans" },
-									{ name: "Patreon", value: "patreon" },
-									{ name: "Twitch", value: "twitch" },
-									{ name: "Reddit", value: "reddit" },
-									{ name: "LinkedIn", value: "linkedin" },
-									{ name: "Pinterest", value: "pinterest" },
-									{ name: "Discord", value: "discord" },
-									{ name: "Snapchat", value: "snapchat" },
-									{ name: "Facebook", value: "facebook" },
 								],
 								default: "instagram",
 								description: "Platform of the reference creator (Lookalikes with filters)",
@@ -397,18 +471,11 @@ export class InfluencersClub implements INodeType {
 								type: "options",
 								options: [
 									{ name: "Instagram", value: "instagram" },
-									{ name: "TikTok", value: "tiktok" },
 									{ name: "YouTube", value: "youtube" },
+									{ name: "TikTok", value: "tiktok" },
+									{ name: "Twitch", value: "twitch" },
 									{ name: "Twitter", value: "twitter" },
 									{ name: "OnlyFans", value: "onlyfans" },
-									{ name: "Patreon", value: "patreon" },
-									{ name: "Twitch", value: "twitch" },
-									{ name: "Reddit", value: "reddit" },
-									{ name: "LinkedIn", value: "linkedin" },
-									{ name: "Pinterest", value: "pinterest" },
-									{ name: "Discord", value: "discord" },
-									{ name: "Snapchat", value: "snapchat" },
-									{ name: "Facebook", value: "facebook" },
 								],
 								default: "instagram",
 								description: "Platform to discover creators on (Creator Discovery API)",
@@ -423,8 +490,8 @@ export class InfluencersClub implements INodeType {
 								displayName: "Limit",
 								name: "discovery_limit",
 								type: "number",
-								default: 20,
-								description: "Number of creators to return per page",
+								default: 5,
+								description: "Number of creators to return per page (paging object; API default 5)",
 								displayOptions: {
 									show: {
 										resource: ["discovery"],
@@ -437,11 +504,42 @@ export class InfluencersClub implements INodeType {
 								name: "discovery_page",
 								type: "number",
 								default: 0,
-								description: "Zero-based page index for pagination",
+								description: "Page index for pagination (paging object; API default 0)",
 								displayOptions: {
 									show: {
 										resource: ["discovery"],
 										operation: ["discovery"],
+									},
+								},
+							},
+							{
+								displayName: "Sort By",
+								name: "discovery_sort_by",
+								type: "options",
+								options: [
+									{ name: "Relevancy", value: "relevancy" },
+									{ name: "Engagement Rate", value: "engagement_rate" },
+									{ name: "Number of Followers", value: "number_of_followers" },
+								],
+								default: "relevancy",
+								description: "Sort creators by relevant data points (sort object)",
+								displayOptions: {
+									show: {
+										resource: ["discovery"],
+										operation: ["discovery"],
+									},
+								},
+							},
+							{
+								displayName: "Include Request in Output",
+								name: "include_request_in_output",
+								type: "boolean",
+								default: false,
+								description: "Attach the request body sent to the API to the output (for debugging filters)",
+								displayOptions: {
+									show: {
+										resource: ["creator", "discovery"],
+										operation: ["discovery", "findLookalikes"],
 									},
 								},
 							},
@@ -469,12 +567,36 @@ export class InfluencersClub implements INodeType {
 						name: "filters",
 						displayName: "Filters",
 						values: [
+							// Top row (general): Location, Followers, Last Post, Engagement Rate, Gender, Language
 							{
 								displayName: "Location",
 								name: "location",
-							type: "string",
-							default: "",
-							description: "Comma-separated locations (country or city)",
+								type: "string",
+								default: "",
+								description: "Comma-separated locations (country or city)",
+							},
+							{
+								displayName: "Gender",
+								name: "gender",
+								type: "options",
+								options: [
+									{ name: "Any", value: "" },
+									{ name: "Male", value: "male" },
+									{ name: "Female", value: "female" },
+								],
+								default: "",
+								displayOptions: {
+									hide: {
+										"/advancedFilters.filters.type": ["business"],
+									},
+								},
+							},
+							{
+								displayName: "Profile Language",
+								name: "profile_language",
+								type: "string",
+								default: "",
+								description: "Comma-separated languages (ISO 639-1)",
 							},
 							{
 								displayName: "Type",
@@ -488,86 +610,124 @@ export class InfluencersClub implements INodeType {
 								default: "",
 							},
 							{
-								displayName: "Gender",
-								name: "gender",
-								type: "options",
-								options: [
-									{ name: "Any", value: "" },
-									{ name: "Male", value: "male" },
-									{ name: "Female", value: "female" },
-								],
-								default: "",
-							displayOptions: {
-								hide: {
-									"/advancedFilters.filters.type": ["business"],
-								},
-							},
+								displayName: "Promotes Affiliate Links",
+								name: "promotes_affiliate_links",
+								type: "boolean",
+								default: false,
 							},
 							{
-							displayName: "Profile Language",
-								name: "profile_language",
-							type: "string",
-							default: "",
-							description: "Comma-separated languages (ISO 639-1)",
+								displayName: "Has Done Brand Deals",
+								name: "has_done_brand_deals",
+								type: "boolean",
+								default: false,
 							},
-						{
-							displayName: "Promotes Affiliate Links",
-							name: "promotes_affiliate_links",
-							type: "boolean",
-							default: false,
-						},
-						{
-							displayName: "Has Done Brand Deals",
-							name: "has_done_brand_deals",
-							type: "boolean",
-							default: false,
-						},
-						{
-							displayName: "Has Link in Bio",
-							name: "has_link_in_bio",
-							type: "boolean",
-							default: false,
-						},
-						{
-							displayName: "Does Live Streaming",
-							name: "does_live_streaming",
-							type: "boolean",
-							default: false,
-						},
-						{
-							displayName: "Has Merch",
-							name: "has_merch",
-							type: "boolean",
-							default: false,
-						},
-						{
-							displayName: "Brands",
-							name: "brands",
-							type: "string",
-							default: "",
-							description: "Comma-separated list of brands",
-						},
-						{
-							name: "creator_has",
-							displayName: "Creator Has",
-							type: "fixedCollection",
-							placeholder: "Add Platform Presence Flags",
-							default: {},
-							options: [
-								{
-									name: "platforms",
-									displayName: "Platforms",
-									values: [
-										{ displayName: "Instagram", name: "instagram", type: "boolean", default: false },
-										{ displayName: "YouTube", name: "youtube", type: "boolean", default: false },
-										{ displayName: "TikTok", name: "tiktok", type: "boolean", default: false },
-										{ displayName: "Twitter", name: "twitter", type: "boolean", default: false },
-										{ displayName: "OnlyFans", name: "onlyfans", type: "boolean", default: false },
-										{ displayName: "Twitch", name: "twitch", type: "boolean", default: false },
-									],
-								},
-							],
-						},
+							{
+								displayName: "Has Link in Bio",
+								name: "has_link_in_bio",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Does Live Streaming",
+								name: "does_live_streaming",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Has Merch",
+								name: "has_merch",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Brands",
+								name: "brands",
+								type: "string",
+								default: "",
+								description: "Comma-separated list of brands",
+							},
+							{
+								displayName: "Exclude Role-Based Emails",
+								name: "exclude_role_based_emails",
+								type: "boolean",
+								default: false,
+								description: "Whether to exclude creators with role-based emails (e.g. info@, support@)",
+							},
+							{
+								displayName: "Exclude Previous",
+								name: "exclude_previous",
+								type: "boolean",
+								default: false,
+								description: "Whether to exclude previously returned creators",
+							},
+							{
+								name: "creator_has",
+								displayName: "Creator Has",
+								type: "fixedCollection",
+								placeholder: "Add Platform Presence Flags",
+								default: {},
+								options: [
+									{
+										name: "platforms",
+										displayName: "Platforms",
+										values: [
+											{ displayName: "Amazon Affiliates", name: "amazonaffiliates", type: "boolean", default: false },
+											{ displayName: "Anchor", name: "anchor", type: "boolean", default: false },
+											{ displayName: "Apple Music", name: "applemusic", type: "boolean", default: false },
+											{ displayName: "Bandcamp", name: "bandcamp", type: "boolean", default: false },
+											{ displayName: "Behance", name: "behance", type: "boolean", default: false },
+											{ displayName: "Buy Me a Coffee", name: "buymeacoffee", type: "boolean", default: false },
+											{ displayName: "Cameo", name: "cameo", type: "boolean", default: false },
+											{ displayName: "Canva", name: "canva", type: "boolean", default: false },
+											{ displayName: "Clubhouse", name: "clubhouse", type: "boolean", default: false },
+											{ displayName: "Community", name: "community", type: "boolean", default: false },
+											{ displayName: "Discord", name: "discord", type: "boolean", default: false },
+											{ displayName: "Dribbble", name: "dribbble", type: "boolean", default: false },
+											{ displayName: "Etsy", name: "etsy", type: "boolean", default: false },
+											{ displayName: "Facebook", name: "facebook", type: "boolean", default: false },
+											{ displayName: "Fiverr", name: "fiverr", type: "boolean", default: false },
+											{ displayName: "GitHub", name: "github", type: "boolean", default: false },
+											{ displayName: "GoFundMe", name: "gofundme", type: "boolean", default: false },
+											{ displayName: "Goodreads", name: "goodreads", type: "boolean", default: false },
+											{ displayName: "Instagram", name: "instagram", type: "boolean", default: false },
+											{ displayName: "Kakao", name: "kakao", type: "boolean", default: false },
+											{ displayName: "Kickstarter", name: "kickstarter", type: "boolean", default: false },
+											{ displayName: "Ko-fi", name: "kofi", type: "boolean", default: false },
+											{ displayName: "LinkedIn", name: "linkedin", type: "boolean", default: false },
+											{ displayName: "Linktree", name: "linktree", type: "boolean", default: false },
+											{ displayName: "Medium", name: "medium", type: "boolean", default: false },
+											{ displayName: "OnlyFans", name: "onlyfans", type: "boolean", default: false },
+											{ displayName: "Patreon", name: "patreon", type: "boolean", default: false },
+											{ displayName: "Phone", name: "phone", type: "boolean", default: false },
+											{ displayName: "Pinterest", name: "pinterest", type: "boolean", default: false },
+											{ displayName: "Podcast", name: "podcast", type: "boolean", default: false },
+											{ displayName: "Redbubble", name: "redbubble", type: "boolean", default: false },
+											{ displayName: "Shopify", name: "shopify", type: "boolean", default: false },
+											{ displayName: "ShopLTK", name: "shopltk", type: "boolean", default: false },
+											{ displayName: "Snapchat", name: "snapchat", type: "boolean", default: false },
+											{ displayName: "SoundCloud", name: "soundcloud", type: "boolean", default: false },
+											{ displayName: "Spotify", name: "spotify", type: "boolean", default: false },
+											{ displayName: "Spring", name: "spring", type: "boolean", default: false },
+											{ displayName: "Streamlabs", name: "streamlabs", type: "boolean", default: false },
+											{ displayName: "Substack", name: "substack", type: "boolean", default: false },
+											{ displayName: "Telegram", name: "telegram", type: "boolean", default: false },
+											{ displayName: "TikTok", name: "tiktok", type: "boolean", default: false },
+											{ displayName: "Tumblr", name: "tumblr", type: "boolean", default: false },
+											{ displayName: "Twitch", name: "twitch", type: "boolean", default: false },
+											{ displayName: "Twitter", name: "twitter", type: "boolean", default: false },
+											{ displayName: "Udemy", name: "udemy", type: "boolean", default: false },
+											{ displayName: "Viber", name: "viber", type: "boolean", default: false },
+											{ displayName: "Vimeo", name: "vimeo", type: "boolean", default: false },
+											{ displayName: "VK", name: "vk", type: "boolean", default: false },
+											{ displayName: "Weebly", name: "weebly", type: "boolean", default: false },
+											{ displayName: "WhatsApp", name: "whatsApp", type: "boolean", default: false },
+											{ displayName: "Wix", name: "wix", type: "boolean", default: false },
+											{ displayName: "YouTube", name: "youtube", type: "boolean", default: false },
+										],
+									},
+								],
+							},
+							// CREATOR section: Link in bio, Keywords in bio, Estimated Income, Exclude Private, Verified, Follower Growth, Posting Frequency, Number of posts
 							{
 								displayName: "Is Verified",
 								name: "is_verified",
@@ -604,7 +764,15 @@ export class InfluencersClub implements INodeType {
 					{
 						name: "instagramFilters",
 						displayName: "Instagram Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["youtube", "tiktok", "twitch", "twitter", "onlyfans"],
+							},
+						},
 						values: [
+							// Top row: Followers, Last Post, Engagement Rate
 							{
 								displayName: "Min Followers",
 								name: "min_followers",
@@ -618,28 +786,83 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
-								displayName: "Min Average Likes",
-								name: "min_average_likes",
+								displayName: "Last Post",
+								name: "last_post",
+								type: "string",
+								default: "",
+							},
+							{
+								displayName: "Engagement Rate Min (%)",
+								name: "engagement_percent_min",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Average Likes",
-								name: "max_average_likes",
+								displayName: "Engagement Rate Max (%)",
+								name: "engagement_percent_max",
+								type: "number",
+								default: 0,
+							},
+							// CREATOR Row 1: Link in bio contains, Keywords in bio, Estimated Income, Exclude Private Profiles
+							{
+								displayName: "Link in Bio Contains",
+								name: "link_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated links or keywords",
+							},
+							{
+								displayName: "Keywords in Bio",
+								name: "keywords_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Min Income",
+								name: "min_income",
+								type: "number",
+								default: 0,
+								description: "Estimated Income (min)",
+							},
+							{
+								displayName: "Max Income",
+								name: "max_income",
+								type: "number",
+								default: 0,
+								description: "Estimated Income (max)",
+							},
+							{
+								displayName: "Exclude Private Profiles",
+								name: "exclude_private_profile",
+								type: "boolean",
+								default: false,
+							},
+							// CREATOR Row 2: Verified Profile, Follower Growth, Posting Frequency, Number of posts
+							{
+								displayName: "Verified Profile",
+								name: "is_verified",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Follower Growth Percentage",
+								name: "follower_growth_percentage",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Min Average Comments",
-								name: "min_average_comments",
+								displayName: "Follower Growth Time Range (Months)",
+								name: "follower_growth_time_range_months",
 								type: "number",
-								default: 0,
+								default: 3,
 							},
 							{
-								displayName: "Max Average Comments",
-								name: "max_average_comments",
+								displayName: "Posting Frequency",
+								name: "posting_frequency",
 								type: "number",
 								default: 0,
+								description: "Average posts per week",
 							},
 							{
 								displayName: "Min Number of Posts",
@@ -654,6 +877,34 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
+								displayName: "Exclude Keywords in Bio",
+								name: "exclude_keywords_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude",
+							},
+							// CONTENT Row 1: Hashtags, Keywords in captions, Has Reels (Has Videos Previously), Reels %
+							{
+								displayName: "Hashtags",
+								name: "hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags",
+							},
+							{
+								displayName: "Keywords in Captions",
+								name: "keywords_in_captions",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Has Reels (Has Videos Previously)",
+								name: "has_videos",
+								type: "boolean",
+								default: false,
+							},
+							{
 								displayName: "Min Reels Percent",
 								name: "min_reels_percent",
 								type: "number",
@@ -665,11 +916,13 @@ export class InfluencersClub implements INodeType {
 								type: "number",
 								default: 0,
 							},
+							// CONTENT Row 2: Avg. Views for Reels (last 30 reels), Average Likes (last 30 posts), Average Comments (last 30 posts), Tagged Profiles
 							{
 								displayName: "Min Average Views for Reels",
 								name: "min_average_views_for_reels",
 								type: "number",
 								default: 0,
+								description: "Avg. views for reels (last 30 reels)",
 							},
 							{
 								displayName: "Max Average Views for Reels",
@@ -678,35 +931,51 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
-								displayName: "Min Income",
-								name: "min_income",
+								displayName: "Min Average Likes",
+								name: "min_average_likes",
+								type: "number",
+								default: 0,
+								description: "Average likes (last 30 posts)",
+							},
+							{
+								displayName: "Max Average Likes",
+								name: "max_average_likes",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Income",
-								name: "max_income",
+								displayName: "Min Average Comments",
+								name: "min_average_comments",
 								type: "number",
 								default: 0,
+								description: "Average comments (last 30 posts)",
+							},
+							{
+								displayName: "Max Average Comments",
+								name: "max_average_comments",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Tagged Profiles",
+								name: "similar_to",
+								type: "string",
+								default: "",
+								description: "Comma-separated usernames or handles",
+							},
+							// Additional filters (not in screenshot)
+							{
+								displayName: "Exclude Hashtags",
+								name: "not_hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags to exclude",
 							},
 							{
 								displayName: "Has Merch",
 								name: "has_merch",
 								type: "boolean",
 								default: false,
-							},
-							{
-								displayName: "Keywords in Bio",
-								name: "keywords_in_bio",
-								type: "string",
-								default: "",
-								description: "Comma-separated keywords",
-							},
-							{
-								displayName: "Last Post",
-								name: "last_post",
-								type: "string",
-								default: "",
 							},
 							{
 								displayName: "Min Video Percentage",
@@ -725,7 +994,15 @@ export class InfluencersClub implements INodeType {
 					{
 						name: "youtubeFilters",
 						displayName: "YouTube Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["instagram", "tiktok", "twitch", "twitter", "onlyfans"],
+							},
+						},
 						values: [
+							// Top: Subscribers
 							{
 								displayName: "Min Subscribers",
 								name: "min_subscribers",
@@ -738,20 +1015,42 @@ export class InfluencersClub implements INodeType {
 								type: "number",
 								default: 0,
 							},
+							// CREATOR Row 1: Link in Channel Description, Keywords in Channel Description, Estimated Income, Verified Profile
 							{
-								displayName: "Keywords in Video Titles",
-								name: "keywords_in_video_titles",
+								displayName: "Link in Channel Description",
+								name: "links_from_description",
 								type: "string",
 								default: "",
-								description: "Comma-separated keywords",
+								description: "Comma-separated links or keywords",
 							},
 							{
-								displayName: "Keywords in Description",
+								displayName: "Keywords in Channel Description",
 								name: "keywords_in_description",
 								type: "string",
 								default: "",
 								description: "Comma-separated keywords",
 							},
+							{
+								displayName: "Min Income",
+								name: "income_min",
+								type: "number",
+								default: 0,
+								description: "Estimated Income (min)",
+							},
+							{
+								displayName: "Max Income",
+								name: "income_max",
+								type: "number",
+								default: 0,
+								description: "Estimated Income (max)",
+							},
+							{
+								displayName: "Verified Profile",
+								name: "is_verified",
+								type: "boolean",
+								default: false,
+							},
+							// CREATOR Row 2: Subscriber Growth, Posting Frequency, Is Monetizing, Youtube Membership
 							{
 								displayName: "Subscriber Growth Percentage",
 								name: "subscriber_growth_percentage",
@@ -763,6 +1062,106 @@ export class InfluencersClub implements INodeType {
 								name: "subscriber_growth_time_range_months",
 								type: "number",
 								default: 3,
+							},
+							{
+								displayName: "Posting Frequency",
+								name: "posting_frequency",
+								type: "number",
+								default: 0,
+								description: "Average posts per week",
+							},
+							{
+								displayName: "Is Monetizing",
+								name: "is_monetizing",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Youtube Membership",
+								name: "has_membership",
+								type: "boolean",
+								default: false,
+							},
+							// CREATOR Row 3: Has Youtube Store, Has Community Posts, Streams Live, Number of Videos
+							{
+								displayName: "Has Youtube Store",
+								name: "has_merch",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Has Community Posts",
+								name: "has_community_posts",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Streams Live",
+								name: "streams_live",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Min Number of Videos",
+								name: "min_number_of_videos",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Number of Videos",
+								name: "max_number_of_videos",
+								type: "number",
+								default: 0,
+							},
+							// CREATOR Row 4: Has YouTube Podcast, Has YouTube Courses
+							{
+								displayName: "Has YouTube Podcast",
+								name: "has_podcast",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Has YouTube Courses",
+								name: "has_courses",
+								type: "boolean",
+								default: false,
+							},
+							// CONTENT Row 1: Topics, Keywords in Video Description, Keywords in Video Titles, Hashtags
+							{
+								displayName: "Topics",
+								name: "topics",
+								type: "string",
+								default: "",
+								description: "Comma-separated topics",
+							},
+							{
+								displayName: "Keywords in Video Description",
+								name: "keywords_in_video_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Keywords in Video Titles",
+								name: "keywords_in_video_titles",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Hashtags",
+								name: "hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags",
+							},
+							// CONTENT Row 2: Link in Video Description, Has Shorts, Shorts %, Avg. Views on Long Videos
+							{
+								displayName: "Link in Video Description",
+								name: "links_from_video_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated links or keywords",
 							},
 							{
 								displayName: "Has Shorts",
@@ -783,16 +1182,11 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
-								displayName: "Has Community Posts",
-								name: "has_community_posts",
-								type: "boolean",
-								default: false,
-							},
-							{
 								displayName: "Min Average Views on Long Videos",
 								name: "min_average_views_on_long_videos",
 								type: "number",
 								default: 0,
+								description: "Avg. views on long videos",
 							},
 							{
 								displayName: "Max Average Views on Long Videos",
@@ -800,11 +1194,27 @@ export class InfluencersClub implements INodeType {
 								type: "number",
 								default: 0,
 							},
+							// CONTENT Row 3: Long Video Duration, Avg. Views Shorts (last 10 shorts), Tagged Profiles
+							{
+								displayName: "Min Long Video Duration",
+								name: "long_video_duration_min",
+								type: "number",
+								default: 0,
+								description: "Long video duration (min), in minutes",
+							},
+							{
+								displayName: "Max Long Video Duration",
+								name: "long_video_duration_max",
+								type: "number",
+								default: 0,
+								description: "Long video duration (max), in minutes",
+							},
 							{
 								displayName: "Min Average Views on Shorts",
 								name: "min_average_views_on_shorts",
 								type: "number",
 								default: 0,
+								description: "Avg. views shorts (last 10 shorts)",
 							},
 							{
 								displayName: "Max Average Views on Shorts",
@@ -813,47 +1223,158 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
-								displayName: "Is Monetizing",
-								name: "is_monetizing",
-								type: "boolean",
-								default: false,
+								displayName: "Tagged Profiles",
+								name: "similar_to",
+								type: "string",
+								default: "",
+								description: "Comma-separated usernames or channel IDs",
+							},
+							// CONTENT Row 4: Last upload / stream (API: last_upload_long_video, last_upload_short_video, last_stream_upload)
+							{
+								displayName: "Last Upload Long Video",
+								name: "last_upload_long_video",
+								type: "string",
+								default: "",
+								description: "any, 90, or 365 days",
+							},
+							{
+								displayName: "Last Upload Short Video",
+								name: "last_upload_short_video",
+								type: "string",
+								default: "",
+								description: "any, 90, or 365 days",
+							},
+							{
+								displayName: "Last Stream Upload",
+								name: "last_stream_upload",
+								type: "string",
+								default: "",
+								description: "any, 90, 180, or 365 days",
+							},
+							{
+								displayName: "Min Average Stream Views",
+								name: "average_stream_views_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Stream Views",
+								name: "average_stream_views_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Min Average Stream Duration (seconds)",
+								name: "average_stream_duration_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Stream Duration (seconds)",
+								name: "average_stream_duration_max",
+								type: "number",
+								default: 0,
+							},
+							// Additional (execute supports these; not in screenshot)
+							{
+								displayName: "Keywords Not in Description",
+								name: "keywords_not_in_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude",
+							},
+							{
+								displayName: "Keywords Not in Video Description",
+								name: "keywords_not_in_video_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude",
+							},
+							{
+								displayName: "Exclude Hashtags",
+								name: "not_hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags to exclude",
+							},
+							{
+								displayName: "Engagement Rate Min (%)",
+								name: "engagement_percent_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Engagement Rate Max (%)",
+								name: "engagement_percent_max",
+								type: "number",
+								default: 0,
 							},
 						],
 					},
 					{
 						name: "tiktokFilters",
 						displayName: "TikTok Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["instagram", "youtube", "twitch", "twitter", "onlyfans"],
+							},
+						},
 						values: [
+							// CREATOR: Link in bio contains, Keywords in bio, Exclude Private Profiles, Verified Profile
 							{
-								displayName: "Min Average Video Downloads",
-								name: "min_average_video_downloads",
-								type: "number",
-								default: 0,
+								displayName: "Link in Bio Contains",
+								name: "link_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated links or keywords",
 							},
 							{
-								displayName: "Max Average Video Downloads",
-								name: "max_average_video_downloads",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Min Number of Videos",
-								name: "min_number_of_videos",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Max Number of Videos",
-								name: "max_number_of_videos",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Keywords in Video Description",
-								name: "keywords_in_video_description",
+								displayName: "Keywords in Bio",
+								name: "keywords_in_bio",
 								type: "string",
 								default: "",
 								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Exclude Keywords in Bio",
+								name: "exclude_keywords_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude",
+							},
+							{
+								displayName: "Exclude Private Profiles",
+								name: "exclude_private_profile",
+								type: "boolean",
+								default: false,
+							},
+							{
+								displayName: "Verified Profile",
+								name: "is_verified",
+								type: "boolean",
+								default: false,
+							},
+							// CREATOR: Follower Growth, Posting Frequency, Has TikTok Shop, Number of Posts (videos)
+							{
+								displayName: "Follower Growth Percentage",
+								name: "follower_growth_percentage",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Follower Growth Time Range (Months)",
+								name: "follower_growth_time_range_months",
+								type: "number",
+								default: 3,
+							},
+							{
+								displayName: "Posting Frequency",
+								name: "posting_frequency",
+								type: "number",
+								default: 0,
+								description: "Average posts per week",
 							},
 							{
 								displayName: "Has TikTok Shop",
@@ -861,12 +1382,204 @@ export class InfluencersClub implements INodeType {
 								type: "boolean",
 								default: false,
 							},
+							{
+								displayName: "Min Number of Videos",
+								name: "video_count_min",
+								type: "number",
+								default: 0,
+								description: "Number of videos (min)",
+							},
+							{
+								displayName: "Max Number of Videos",
+								name: "video_count_max",
+								type: "number",
+								default: 0,
+								description: "Number of videos (max)",
+							},
+							{
+								displayName: "Min Number of Followers",
+								name: "number_of_followers_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Number of Followers",
+								name: "number_of_followers_max",
+								type: "number",
+								default: 0,
+							},
+							// CONTENT: Hashtags, Video Description, Average Views, Average Likes, Average Comments, Average Downloads, Tagged Profiles
+							{
+								displayName: "Hashtags",
+								name: "hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags",
+							},
+							{
+								displayName: "Exclude Hashtags",
+								name: "not_hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags to exclude",
+							},
+							{
+								displayName: "Video Description",
+								name: "video_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords in video description",
+							},
+							{
+								displayName: "Exclude Video Description",
+								name: "not_video_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude from video description",
+							},
+							{
+								displayName: "Min Average Views (last 30 videos)",
+								name: "average_views_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Views (last 30 videos)",
+								name: "average_views_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Min Average Likes (last 30 videos)",
+								name: "average_likes_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Likes (last 30 videos)",
+								name: "average_likes_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Min Average Comments (last 30 videos)",
+								name: "average_comments_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Comments (last 30 videos)",
+								name: "average_comments_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Min Average Downloads",
+								name: "average_video_downloads_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Downloads",
+								name: "average_video_downloads_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Tagged Profiles",
+								name: "similar_to",
+								type: "string",
+								default: "",
+								description: "Comma-separated usernames or handles",
+							},
+							// Additional (execute supports these)
+							{
+								displayName: "Last Post",
+								name: "last_post",
+								type: "string",
+								default: "",
+							},
+							{
+								displayName: "Engagement Rate Min (%)",
+								name: "engagement_percent_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Engagement Rate Max (%)",
+								name: "engagement_percent_max",
+								type: "number",
+								default: 0,
+							},
 						],
 					},
 					{
 						name: "twitterFilters",
 						displayName: "Twitter Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["instagram", "youtube", "tiktok", "twitch", "onlyfans"],
+							},
+						},
 						values: [
+							// CONTENT Row 1: Engagement Rate, Keywords in bio, Link in bio contains, Keywords in Tweets
+							{
+								displayName: "Engagement Rate Min (%)",
+								name: "engagement_percent_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Engagement Rate Max (%)",
+								name: "engagement_percent_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Keywords in Bio",
+								name: "keywords_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Exclude Keywords in Bio",
+								name: "exclude_keywords_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords to exclude",
+							},
+							{
+								displayName: "Link in Bio Contains",
+								name: "link_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated links or keywords",
+							},
+							{
+								displayName: "Keywords in Tweets",
+								name: "keywords_in_tweets",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							// CONTENT Row 2: Hashtags, Number of Tweets, Average Likes (last 30 posts), Tagged Profiles
+							{
+								displayName: "Hashtags",
+								name: "hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags",
+							},
+							{
+								displayName: "Exclude Hashtags",
+								name: "not_hashtags",
+								type: "string",
+								default: "",
+								description: "Comma-separated hashtags to exclude",
+							},
 							{
 								displayName: "Min Number of Tweets",
 								name: "min_number_of_tweets",
@@ -880,141 +1593,216 @@ export class InfluencersClub implements INodeType {
 								default: 0,
 							},
 							{
-								displayName: "Keywords in Tweets",
-								name: "keywords_in_tweets",
+								displayName: "Min Average Likes (last 30 posts)",
+								name: "average_likes_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Average Likes (last 30 posts)",
+								name: "average_likes_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Tagged Profiles",
+								name: "similar_to",
 								type: "string",
 								default: "",
-								description: "Comma-separated keywords",
+								description: "Comma-separated usernames or handles",
+							},
+							// Additional (execute supports these)
+							{
+								displayName: "Min Number of Followers",
+								name: "number_of_followers_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Number of Followers",
+								name: "number_of_followers_max",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Last Post",
+								name: "last_post",
+								type: "string",
+								default: "",
 							},
 						],
 					},
 					{
 						name: "onlyfansFilters",
 						displayName: "OnlyFans Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["instagram", "youtube", "tiktok", "twitch", "twitter"],
+							},
+						},
 						values: [
+							// CREATOR: Is verified, Has Free Account, Has Live Streams
 							{
-								displayName: "Min Subscription Price",
-								name: "min_subscription_price",
-								type: "number",
-								default: 0,
+								displayName: "Is Verified",
+								name: "is_verified",
+								type: "boolean",
+								default: false,
 							},
 							{
-								displayName: "Max Subscription Price",
-								name: "max_subscription_price",
-								type: "number",
-								default: 0,
+								displayName: "Has Free Account",
+								name: "has_free_account",
+								type: "boolean",
+								default: false,
 							},
 							{
-								displayName: "Min Number of Photos",
-								name: "min_number_of_photos",
-								type: "number",
-								default: 0,
+								displayName: "Has Live Streams",
+								name: "has_live_streams",
+								type: "boolean",
+								default: false,
 							},
+							// CONTENT: Has Videos, Number of Likes, Number of Posts, Subscription price, Tagged Profiles
 							{
-								displayName: "Max Number of Photos",
-								name: "max_number_of_photos",
-								type: "number",
-								default: 0,
+								displayName: "Has Videos",
+								name: "has_videos",
+								type: "boolean",
+								default: false,
 							},
 							{
 								displayName: "Min Number of Likes",
-								name: "min_number_of_likes",
+								name: "number_of_likes_min",
 								type: "number",
 								default: 0,
 							},
 							{
 								displayName: "Max Number of Likes",
-								name: "max_number_of_likes",
+								name: "number_of_likes_max",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Min Followers",
-								name: "min_followers",
+								displayName: "Min Number of Posts",
+								name: "number_of_photos_min",
+								type: "number",
+								default: 0,
+								description: "Number of posts/photos (min)",
+							},
+							{
+								displayName: "Max Number of Posts",
+								name: "number_of_photos_max",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Followers",
-								name: "max_followers",
+								displayName: "Min Subscription Price",
+								name: "subscription_price_min",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Min Active Subscribers",
-								name: "min_active_subscribers",
+								displayName: "Max Subscription Price",
+								name: "subscription_price_max",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Active Subscribers",
-								name: "max_active_subscribers",
-								type: "number",
-								default: 0,
+								displayName: "Tagged Profiles",
+								name: "similar_to",
+								type: "string",
+								default: "",
+								description: "Comma-separated usernames or handles",
+							},
+							// Additional (execute supports these)
+							{
+								displayName: "Last Active",
+								name: "last_active",
+								type: "string",
+								default: "",
+								description: "any, 90, or 365 days",
 							},
 						],
 					},
 					{
 						name: "twitchFilters",
 						displayName: "Twitch Filters",
+						displayOptions: {
+							hide: {
+								resource: ["discovery"],
+								operation: ["discovery"],
+								discovery_platform: ["instagram", "youtube", "tiktok", "twitter", "onlyfans"],
+							},
+						},
 						values: [
+							// CREATOR: Is a Twitch Partner
 							{
-								displayName: "Min Streamed Hours Last 30 Days",
+								displayName: "Is a Twitch Partner",
+								name: "is_twitch_partner",
+								type: "boolean",
+								default: false,
+							},
+							// CONTENT Row 1: Keywords in description, Link in bio contains, Streamed hours (last 30 days), Total Streams (last 30 days)
+							{
+								displayName: "Keywords in Description",
+								name: "keywords_in_description",
+								type: "string",
+								default: "",
+								description: "Comma-separated keywords",
+							},
+							{
+								displayName: "Link in Bio Contains",
+								name: "link_in_bio",
+								type: "string",
+								default: "",
+								description: "Comma-separated links or keywords",
+							},
+							{
+								displayName: "Min Streamed Hours (Last 30 Days)",
 								name: "min_streamed_hours_last_30_days",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Streamed Hours Last 30 Days",
+								displayName: "Max Streamed Hours (Last 30 Days)",
 								name: "max_streamed_hours_last_30_days",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Min Total Hours Streamed",
-								name: "min_total_hours_streamed",
+								displayName: "Min Total Streams (Last 30 Days)",
+								name: "min_streams_count_last_30_days",
+								type: "number",
+								default: 0,
+								description: "Total streams count (last 30 days)",
+							},
+							{
+								displayName: "Max Total Streams (Last 30 Days)",
+								name: "max_streams_count_last_30_days",
 								type: "number",
 								default: 0,
 							},
+							// CONTENT Row 2: Maximum View Count, Average Views (Last 30 days), Games Played, Tagged Profiles
 							{
-								displayName: "Max Total Hours Streamed",
-								name: "max_total_hours_streamed",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Min Maximum Views Count",
+								displayName: "Min Maximum View Count",
 								name: "min_maximum_views_count",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Maximum Views Count",
+								displayName: "Max Maximum View Count",
 								name: "max_maximum_views_count",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Min Average Views Last 30 Days",
+								displayName: "Min Average Views (Last 30 Days)",
 								name: "min_avg_views_last_30_days",
 								type: "number",
 								default: 0,
 							},
 							{
-								displayName: "Max Average Views Last 30 Days",
+								displayName: "Max Average Views (Last 30 Days)",
 								name: "max_avg_views_last_30_days",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Min Streams Count Last 30 Days",
-								name: "min_streams_count_last_30_days",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Max Streams Count Last 30 Days",
-								name: "max_streams_count_last_30_days",
 								type: "number",
 								default: 0,
 							},
@@ -1026,10 +1814,31 @@ export class InfluencersClub implements INodeType {
 								description: "Comma-separated game names",
 							},
 							{
-								displayName: "Is Twitch Partner",
-								name: "is_twitch_partner",
-								type: "boolean",
-								default: false,
+								displayName: "Tagged Profiles",
+								name: "similar_to",
+								type: "string",
+								default: "",
+								description: "Comma-separated usernames or handles",
+							},
+							// Additional (execute supports these)
+							{
+								displayName: "Last Stream",
+								name: "most_recent_stream_date",
+								type: "string",
+								default: "",
+								description: "e.g. time range or date",
+							},
+							{
+								displayName: "Min Followers",
+								name: "followers_min",
+								type: "number",
+								default: 0,
+							},
+							{
+								displayName: "Max Followers",
+								name: "followers_max",
+								type: "number",
+								default: 0,
 							},
 						],
 					},
@@ -1130,14 +1939,26 @@ export class InfluencersClub implements INodeType {
 			case "discovery": {
 				const ai_search = (additionalOptions.ai_search as string) ?? "";
 				// Optional fields from Additional Options (fallback to legacy top-level for backward compat)
-				const platform = (additionalOptions.discovery_platform as string) ?? (nodeParams.discovery_platform as string) ?? "instagram";
-				const sharedFilters = this.getNodeParameter("advancedFilters.filters", itemIndex, {}) as IDataObject;
-				const instagramFilters = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {}) as IDataObject;
-				const youtubeFilters = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {}) as IDataObject;
-				const tiktokFilters = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {}) as IDataObject;
-				const twitterFilters = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {}) as IDataObject;
-				const onlyfansFilters = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {}) as IDataObject;
-				const twitchFilters = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {}) as IDataObject;
+				// Platform: top-level (Discovery) first, then Additional Options, then legacy
+				const platform = (this.getNodeParameter("discovery_platform", itemIndex, "") as string)
+					|| (additionalOptions.discovery_platform as string)
+					|| (nodeParams.discovery_platform as string)
+					|| "instagram";
+				// fixedCollection with multipleValues can return array; use first set
+				const rawFilters = this.getNodeParameter("advancedFilters.filters", itemIndex, {}) as IDataObject | IDataObject[];
+				const sharedFilters = (Array.isArray(rawFilters) && rawFilters.length ? rawFilters[0] : rawFilters) as IDataObject;
+				const rawIg = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const instagramFilters = (Array.isArray(rawIg) && rawIg.length ? rawIg[0] : rawIg) as IDataObject;
+				const rawYt = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const youtubeFilters = (Array.isArray(rawYt) && rawYt.length ? rawYt[0] : rawYt) as IDataObject;
+				const rawTk = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const tiktokFilters = (Array.isArray(rawTk) && rawTk.length ? rawTk[0] : rawTk) as IDataObject;
+				const rawTw = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const twitterFilters = (Array.isArray(rawTw) && rawTw.length ? rawTw[0] : rawTw) as IDataObject;
+				const rawOf = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const onlyfansFilters = (Array.isArray(rawOf) && rawOf.length ? rawOf[0] : rawOf) as IDataObject;
+				const rawTc = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const twitchFilters = (Array.isArray(rawTc) && rawTc.length ? rawTc[0] : rawTc) as IDataObject;
 				
 				// Build the correct API structure exactly as documented
 				const apiFilters: IDataObject = {};
@@ -1146,19 +1967,21 @@ export class InfluencersClub implements INodeType {
 				if (sharedFilters.location && sharedFilters.location !== "") apiFilters.location = String(sharedFilters.location).split(",").map((s: string) => s.trim()).filter(Boolean);
 				if (sharedFilters.type && sharedFilters.type !== ""	&& ["instagram","youtube","tiktok"].includes(platform)) apiFilters.type = sharedFilters.type;
 				if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business") apiFilters.gender = sharedFilters.gender;
-				if (sharedFilters.profile_language && sharedFilters.profile_language !== "") apiFilters.speaking_language = String(sharedFilters.profile_language).split(",").map((s: string) => s.trim()).filter(Boolean);
+				if (sharedFilters.profile_language && sharedFilters.profile_language !== "") apiFilters.profile_language = String(sharedFilters.profile_language).split(",").map((s: string) => s.trim()).filter(Boolean);
 				if (sharedFilters.promotes_affiliate_links !== undefined) apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
 				if (sharedFilters.has_done_brand_deals !== undefined) apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
 				if (sharedFilters.has_link_in_bio !== undefined) apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
 				if (sharedFilters.does_live_streaming !== undefined) apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
 				if (sharedFilters.has_merch !== undefined) apiFilters.has_merch = sharedFilters.has_merch;
 				if (sharedFilters.brands && typeof sharedFilters.brands === "string") apiFilters.brands = String(sharedFilters.brands).split(",").map((s: string) => s.trim()).filter(Boolean);
+				if (sharedFilters.exclude_role_based_emails !== undefined) apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
+				if (sharedFilters.exclude_previous !== undefined) apiFilters.exclude_previous = sharedFilters.exclude_previous;
 				const creatorHas = this.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []) as IDataObject[];
 				if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
 					apiFilters.creator_has = {} as IDataObject;
 					for (const entry of creatorHas) {
 						for (const [key, value] of Object.entries(entry)) {
-							(apiFilters.creator_has as IDataObject)[key] = value;
+							(apiFilters.creator_has as IDataObject)[`has_${key}`] = value;
 						}
 					}
 				}
@@ -1217,6 +2040,7 @@ export class InfluencersClub implements INodeType {
 					if (youtubeFilters.has_courses !== undefined) apiFilters.has_courses = youtubeFilters.has_courses;
 					if (youtubeFilters.has_membership !== undefined) apiFilters.has_membership = youtubeFilters.has_membership;
 					if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos) apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
+					if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null) apiFilters.long_video_duration = { min: youtubeFilters.long_video_duration_min ?? null, max: youtubeFilters.long_video_duration_max ?? null };
 					if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts) apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
 					if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos) apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
 					if (youtubeFilters.is_monetizing !== undefined) apiFilters.is_monetizing = youtubeFilters.is_monetizing;
@@ -1224,6 +2048,9 @@ export class InfluencersClub implements INodeType {
 					if (youtubeFilters.income_min || youtubeFilters.income_max) apiFilters.income = { min: youtubeFilters.income_min || null, max: youtubeFilters.income_max || null };
 					if (youtubeFilters.last_upload_long_video) apiFilters.last_upload_long_video = youtubeFilters.last_upload_long_video;
 					if (youtubeFilters.last_upload_short_video) apiFilters.last_upload_short_video = youtubeFilters.last_upload_short_video;
+					if (youtubeFilters.last_stream_upload) apiFilters.last_stream_upload = youtubeFilters.last_stream_upload;
+					if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max) apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
+					if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null) apiFilters.average_stream_duration = { min: youtubeFilters.average_stream_duration_min ?? null, max: youtubeFilters.average_stream_duration_max ?? null };
 					if (youtubeFilters.is_verified !== undefined) apiFilters.is_verified = youtubeFilters.is_verified;
 				}
 				
@@ -1255,7 +2082,7 @@ export class InfluencersClub implements INodeType {
 				if (platform === "twitter") {
 					if (twitterFilters.number_of_followers_min || twitterFilters.number_of_followers_max) apiFilters.number_of_followers = { min: twitterFilters.number_of_followers_min || null, max: twitterFilters.number_of_followers_max || null };
 					if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max) apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
-					if (twitterFilters.tweets_count_min || twitterFilters.tweets_count_max) apiFilters.tweets_count = { min: twitterFilters.tweets_count_min || null, max: twitterFilters.tweets_count_max || null };
+					if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null) apiFilters.number_of_tweets = { min: twitterFilters.min_number_of_tweets ?? null, max: twitterFilters.max_number_of_tweets ?? null };
 					if (twitterFilters.average_likes_min || twitterFilters.average_likes_max) apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
 					if (twitterFilters.last_post) apiFilters.last_post = twitterFilters.last_post;
 					if (twitterFilters.similar_to && typeof twitterFilters.similar_to === "string") apiFilters.similar_to = String(twitterFilters.similar_to).split(",").map((k: string) => k.trim()).filter(Boolean);
@@ -1265,7 +2092,7 @@ export class InfluencersClub implements INodeType {
 					if (commaToArray(twitterFilters.link_in_bio)) apiFilters.link_in_bio = commaToArray(twitterFilters.link_in_bio);
 					if (commaToArray(twitterFilters.hashtags)) apiFilters.hashtags = commaToArray(twitterFilters.hashtags);
 					if (commaToArray(twitterFilters.not_hashtags)) apiFilters.not_hashtags = commaToArray(twitterFilters.not_hashtags);
-					if (commaToArray(twitterFilters.tweets)) apiFilters.tweets = commaToArray(twitterFilters.tweets);
+					if (commaToArray(twitterFilters.keywords_in_tweets)) apiFilters.keywords_in_tweets = commaToArray(twitterFilters.keywords_in_tweets);
 				}
 				
 				if (platform === "onlyfans") {
@@ -1282,9 +2109,7 @@ export class InfluencersClub implements INodeType {
 				
 				if (platform === "twitch") {
 					if (twitchFilters.followers_min || twitchFilters.followers_max) apiFilters.followers = { min: twitchFilters.followers_min || null, max: twitchFilters.followers_max || null };
-					if (twitchFilters.active_subscribers_min || twitchFilters.active_subscribers_max) apiFilters.active_subscribers = { min: twitchFilters.active_subscribers_min || null, max: twitchFilters.active_subscribers_max || null };
 					if (twitchFilters.min_streamed_hours_last_30_days || twitchFilters.max_streamed_hours_last_30_days) apiFilters.streamed_hours_last_30_days = { min: twitchFilters.min_streamed_hours_last_30_days || null, max: twitchFilters.max_streamed_hours_last_30_days || null };
-					if (twitchFilters.min_total_hours_streamed || twitchFilters.max_total_hours_streamed) apiFilters.total_hours_streamed = { min: twitchFilters.min_total_hours_streamed || null, max: twitchFilters.max_total_hours_streamed || null };
 					if (twitchFilters.min_maximum_views_count || twitchFilters.max_maximum_views_count) apiFilters.maximum_views_count = { min: twitchFilters.min_maximum_views_count || null, max: twitchFilters.max_maximum_views_count || null };
 					if (twitchFilters.min_avg_views_last_30_days || twitchFilters.max_avg_views_last_30_days) apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
 					if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days) apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
@@ -1296,12 +2121,17 @@ export class InfluencersClub implements INodeType {
 					if (twitchFilters.link_in_bio && typeof twitchFilters.link_in_bio === "string") apiFilters.link_in_bio = String(twitchFilters.link_in_bio).split(",").map((k: string) => k.trim()).filter(Boolean);
 				}
 				
-				const discoveryLimit = (additionalOptions.discovery_limit as number) ?? (nodeParams.discovery_limit as number) ?? 20;
-				const discoveryPage = (additionalOptions.discovery_page as number) ?? (nodeParams.discovery_page as number) ?? 0;
+				// Paging & sort: top-level first, then Additional Options, then legacy
+				const discoveryLimit = (this.getNodeParameter("discovery_limit", itemIndex, undefined) as number | undefined)
+					?? (additionalOptions.discovery_limit as number) ?? (nodeParams.discovery_limit as number) ?? 5;
+				const discoveryPage = (this.getNodeParameter("discovery_page", itemIndex, undefined) as number | undefined)
+					?? (additionalOptions.discovery_page as number) ?? (nodeParams.discovery_page as number) ?? 0;
+				const sortBy = (this.getNodeParameter("discovery_sort_by", itemIndex, "") as string)
+					|| (additionalOptions.discovery_sort_by as string) || (nodeParams.discovery_sort_by as string) || "relevancy";
 				const body: IDataObject = {
 					platform,
 					paging: { limit: discoveryLimit, page: discoveryPage },
-					sort: { sort_by: "relevancy", sort_order: "desc" },
+					sort: { sort_by: sortBy, sort_order: "desc" },
 					filters: {
 						ai_search: ai_search || "",
 						...apiFilters,
@@ -1318,44 +2148,59 @@ export class InfluencersClub implements INodeType {
 					body,
 					json: true,
 				};
+				const includeRequest = (additionalOptions.include_request_in_output as boolean) === true;
                 {
                     const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
-                    outputItems.push({ json: resp as IDataObject, pairedItem: { item: itemIndex } });
+                    const outJson = includeRequest ? { ...(resp as IDataObject), _requestBody: body } : (resp as IDataObject);
+                    outputItems.push({ json: outJson, pairedItem: { item: itemIndex } });
                 }
                 break;
 			}
 			case "findLookalikes": {
 				const filter_value = this.getNodeParameter("filter_value", itemIndex) as string;
 				const filter_key = this.getNodeParameter("filter_key", itemIndex) as string;
-				// Optional fields from Additional Options (fallback to legacy top-level for backward compat)
-				const platform = (additionalOptions.lookalikes_platform as string) ?? (nodeParams.lookalikes_platform as string) ?? "instagram";
+				// Platform: top-level first, then Additional Options, then legacy
+				const platform = (this.getNodeParameter("lookalikes_platform", itemIndex, "") as string)
+					|| (additionalOptions.lookalikes_platform as string)
+					|| (nodeParams.lookalikes_platform as string)
+					|| "instagram";
 				const ai_search = (additionalOptions.ai_search as string) ?? "";
-				const sharedFilters = this.getNodeParameter("advancedFilters.filters", itemIndex, {}) as IDataObject;
-				const instagramFilters = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {}) as IDataObject;
-				const youtubeFilters = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {}) as IDataObject;
-				const tiktokFilters = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {}) as IDataObject;
-				const twitterFilters = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {}) as IDataObject;
-				const onlyfansFilters = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {}) as IDataObject;
-				const twitchFilters = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {}) as IDataObject;
+				// fixedCollection with multipleValues can return array; use first set
+				const rawFiltersL = this.getNodeParameter("advancedFilters.filters", itemIndex, {}) as IDataObject | IDataObject[];
+				const sharedFilters = (Array.isArray(rawFiltersL) && rawFiltersL.length ? rawFiltersL[0] : rawFiltersL) as IDataObject;
+				const rawIgL = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const instagramFilters = (Array.isArray(rawIgL) && rawIgL.length ? rawIgL[0] : rawIgL) as IDataObject;
+				const rawYtL = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const youtubeFilters = (Array.isArray(rawYtL) && rawYtL.length ? rawYtL[0] : rawYtL) as IDataObject;
+				const rawTkL = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const tiktokFilters = (Array.isArray(rawTkL) && rawTkL.length ? rawTkL[0] : rawTkL) as IDataObject;
+				const rawTwL = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const twitterFilters = (Array.isArray(rawTwL) && rawTwL.length ? rawTwL[0] : rawTwL) as IDataObject;
+				const rawOfL = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const onlyfansFilters = (Array.isArray(rawOfL) && rawOfL.length ? rawOfL[0] : rawOfL) as IDataObject;
+				const rawTcL = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {}) as IDataObject | IDataObject[];
+				const twitchFilters = (Array.isArray(rawTcL) && rawTcL.length ? rawTcL[0] : rawTcL) as IDataObject;
 
 				// Reuse discovery filter mapping
 				const apiFilters: IDataObject = {};
 				if (sharedFilters.location && sharedFilters.location !== "") apiFilters.location = String(sharedFilters.location).split(",").map((s: string) => s.trim()).filter(Boolean);
 				if (sharedFilters.type && sharedFilters.type !== "" && ["instagram","youtube","tiktok"].includes(platform)) apiFilters.type = sharedFilters.type;
 				if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business") apiFilters.gender = sharedFilters.gender;
-				if (sharedFilters.profile_language && sharedFilters.profile_language !== "") apiFilters.speaking_language = String(sharedFilters.profile_language).split(",").map((s: string) => s.trim()).filter(Boolean);
+				if (sharedFilters.profile_language && sharedFilters.profile_language !== "") apiFilters.profile_language = String(sharedFilters.profile_language).split(",").map((s: string) => s.trim()).filter(Boolean);
 				if (sharedFilters.promotes_affiliate_links !== undefined) apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
 				if (sharedFilters.has_done_brand_deals !== undefined) apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
 				if (sharedFilters.has_link_in_bio !== undefined) apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
 				if (sharedFilters.does_live_streaming !== undefined) apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
 				if (sharedFilters.has_merch !== undefined) apiFilters.has_merch = sharedFilters.has_merch;
 				if (sharedFilters.brands && typeof sharedFilters.brands === "string") apiFilters.brands = String(sharedFilters.brands).split(",").map((s: string) => s.trim()).filter(Boolean);
+				if (sharedFilters.exclude_role_based_emails !== undefined) apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
+				if (sharedFilters.exclude_previous !== undefined) apiFilters.exclude_previous = sharedFilters.exclude_previous;
 				const creatorHas = this.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []) as IDataObject[];
 				if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
 					apiFilters.creator_has = {} as IDataObject;
 					for (const entry of creatorHas) {
 						for (const [key, value] of Object.entries(entry)) {
-							(apiFilters.creator_has as IDataObject)[key] = value;
+							(apiFilters.creator_has as IDataObject)[`has_${key}`] = value;
 						}
 					}
 				}
@@ -1409,6 +2254,7 @@ export class InfluencersClub implements INodeType {
 					if (youtubeFilters.has_courses !== undefined) apiFilters.has_courses = youtubeFilters.has_courses;
 					if (youtubeFilters.has_membership !== undefined) apiFilters.has_membership = youtubeFilters.has_membership;
 					if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos) apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
+					if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null) apiFilters.long_video_duration = { min: youtubeFilters.long_video_duration_min ?? null, max: youtubeFilters.long_video_duration_max ?? null };
 					if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts) apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
 					if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos) apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
 					if (youtubeFilters.is_monetizing !== undefined) apiFilters.is_monetizing = youtubeFilters.is_monetizing;
@@ -1416,6 +2262,9 @@ export class InfluencersClub implements INodeType {
 					if (youtubeFilters.income_min || youtubeFilters.income_max) apiFilters.income = { min: youtubeFilters.income_min || null, max: youtubeFilters.income_max || null };
 					if (youtubeFilters.last_upload_long_video) apiFilters.last_upload_long_video = youtubeFilters.last_upload_long_video;
 					if (youtubeFilters.last_upload_short_video) apiFilters.last_upload_short_video = youtubeFilters.last_upload_short_video;
+					if (youtubeFilters.last_stream_upload) apiFilters.last_stream_upload = youtubeFilters.last_stream_upload;
+					if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max) apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
+					if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null) apiFilters.average_stream_duration = { min: youtubeFilters.average_stream_duration_min ?? null, max: youtubeFilters.average_stream_duration_max ?? null };
 					if (youtubeFilters.is_verified !== undefined) apiFilters.is_verified = youtubeFilters.is_verified;
 				}
 				if (platform === "tiktok") {
@@ -1444,7 +2293,7 @@ export class InfluencersClub implements INodeType {
 				if (platform === "twitter") {
 					if (twitterFilters.number_of_followers_min || twitterFilters.number_of_followers_max) apiFilters.number_of_followers = { min: twitterFilters.number_of_followers_min || null, max: twitterFilters.number_of_followers_max || null };
 					if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max) apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
-					if (twitterFilters.tweets_count_min || twitterFilters.tweets_count_max) apiFilters.tweets_count = { min: twitterFilters.tweets_count_min || null, max: twitterFilters.tweets_count_max || null };
+					if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null) apiFilters.tweets_count = { min: twitterFilters.min_number_of_tweets ?? null, max: twitterFilters.max_number_of_tweets ?? null };
 					if (twitterFilters.average_likes_min || twitterFilters.average_likes_max) apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
 					if (twitterFilters.last_post) apiFilters.last_post = twitterFilters.last_post;
 					if (commaToArray(twitterFilters.similar_to)) apiFilters.similar_to = commaToArray(twitterFilters.similar_to);
@@ -1453,6 +2302,7 @@ export class InfluencersClub implements INodeType {
 					if (commaToArray(twitterFilters.link_in_bio)) apiFilters.link_in_bio = commaToArray(twitterFilters.link_in_bio);
 					if (commaToArray(twitterFilters.hashtags)) apiFilters.hashtags = commaToArray(twitterFilters.hashtags);
 					if (commaToArray(twitterFilters.not_hashtags)) apiFilters.not_hashtags = commaToArray(twitterFilters.not_hashtags);
+					if (commaToArray(twitterFilters.keywords_in_tweets)) apiFilters.keywords_in_tweets = commaToArray(twitterFilters.keywords_in_tweets);
 					if (commaToArray(twitterFilters.tweets)) apiFilters.tweets = commaToArray(twitterFilters.tweets);
 				}
 				if (platform === "onlyfans") {
@@ -1468,9 +2318,7 @@ export class InfluencersClub implements INodeType {
 				}
 				if (platform === "twitch") {
 					if (twitchFilters.followers_min || twitchFilters.followers_max) apiFilters.followers = { min: twitchFilters.followers_min || null, max: twitchFilters.followers_max || null };
-					if (twitchFilters.active_subscribers_min || twitchFilters.active_subscribers_max) apiFilters.active_subscribers = { min: twitchFilters.active_subscribers_min || null, max: twitchFilters.active_subscribers_max || null };
 					if (twitchFilters.min_streamed_hours_last_30_days || twitchFilters.max_streamed_hours_last_30_days) apiFilters.streamed_hours_last_30_days = { min: twitchFilters.min_streamed_hours_last_30_days || null, max: twitchFilters.max_streamed_hours_last_30_days || null };
-					if (twitchFilters.min_total_hours_streamed || twitchFilters.max_total_hours_streamed) apiFilters.total_hours_streamed = { min: twitchFilters.min_total_hours_streamed || null, max: twitchFilters.max_total_hours_streamed || null };
 					if (twitchFilters.min_maximum_views_count || twitchFilters.max_maximum_views_count) apiFilters.maximum_views_count = { min: twitchFilters.min_maximum_views_count || null, max: twitchFilters.max_maximum_views_count || null };
 					if (twitchFilters.min_avg_views_last_30_days || twitchFilters.max_avg_views_last_30_days) apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
 					if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days) apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
@@ -1491,6 +2339,7 @@ export class InfluencersClub implements INodeType {
 					paging: { limit: lookalikesLimit, page: lookalikesPage },
 					filters: { ai_search: ai_search || "", ...apiFilters },
 				};
+				const includeRequestLookalikes = (additionalOptions.include_request_in_output as boolean) === true;
                 const options: { method: IHttpRequestMethods; url: string; body: IDataObject; json: boolean } = {
 					method: "POST",
 					url: "https://api-dashboard.influencers.club/public/v1/discovery/creators/similar/",
@@ -1499,7 +2348,8 @@ export class InfluencersClub implements INodeType {
 				};
                 {
                     const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
-                    outputItems.push({ json: resp as IDataObject, pairedItem: { item: itemIndex } });
+                    const outJson = includeRequestLookalikes ? { ...(resp as IDataObject), _requestBody: body } : (resp as IDataObject);
+                    outputItems.push({ json: outJson, pairedItem: { item: itemIndex } });
                 }
 				break;
 			}
