@@ -175,7 +175,7 @@ class InfluencersClub {
                 // Discovery: Platform, Paging, Sort at top (matches API runner)
                 {
                     displayName: "Platform",
-                    name: "discovery_platform",
+                    name: "platform",
                     type: "options",
                     options: [
                         { name: "Instagram", value: "instagram" },
@@ -290,13 +290,14 @@ class InfluencersClub {
                 },
                 {
                     displayName: "Platform",
-                    name: "lookalikes_platform",
+                    name: "platform",
                     type: "options",
                     options: [
                         { name: "Instagram", value: "instagram" },
                         { name: "TikTok", value: "tiktok" },
                         { name: "YouTube", value: "youtube" },
                         { name: "Twitch", value: "twitch" },
+                        { name: "Twitter", value: "twitter" },
                         { name: "OnlyFans", value: "onlyfans" },
                     ],
                     default: "instagram",
@@ -408,28 +409,6 @@ class InfluencersClub {
                                         },
                                     },
                                 },
-                                // Find Lookalikes – optional
-                                {
-                                    displayName: "Platform",
-                                    name: "lookalikes_platform",
-                                    type: "options",
-                                    options: [
-                                        { name: "Instagram", value: "instagram" },
-                                        { name: "YouTube", value: "youtube" },
-                                        { name: "TikTok", value: "tiktok" },
-                                        { name: "Twitch", value: "twitch" },
-                                        { name: "Twitter", value: "twitter" },
-                                        { name: "OnlyFans", value: "onlyfans" },
-                                    ],
-                                    default: "instagram",
-                                    description: "Platform of the reference creator (Lookalikes with filters)",
-                                    displayOptions: {
-                                        show: {
-                                            resource: ["creator"],
-                                            operation: ["findLookalikes"],
-                                        },
-                                    },
-                                },
                                 {
                                     displayName: "Limit",
                                     name: "lookalikes_limit",
@@ -457,27 +436,6 @@ class InfluencersClub {
                                     },
                                 },
                                 // Discovery – optional
-                                {
-                                    displayName: "Platform",
-                                    name: "discovery_platform",
-                                    type: "options",
-                                    options: [
-                                        { name: "Instagram", value: "instagram" },
-                                        { name: "YouTube", value: "youtube" },
-                                        { name: "TikTok", value: "tiktok" },
-                                        { name: "Twitch", value: "twitch" },
-                                        { name: "Twitter", value: "twitter" },
-                                        { name: "OnlyFans", value: "onlyfans" },
-                                    ],
-                                    default: "instagram",
-                                    description: "Platform to discover creators on (Creator Discovery API)",
-                                    displayOptions: {
-                                        show: {
-                                            resource: ["discovery"],
-                                            operation: ["discovery"],
-                                        },
-                                    },
-                                },
                                 {
                                     displayName: "Limit",
                                     name: "discovery_limit",
@@ -757,10 +715,8 @@ class InfluencersClub {
                             name: "instagramFilters",
                             displayName: "Instagram Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["youtube", "tiktok", "twitch", "twitter", "onlyfans"],
+                                show: {
+                                    "/platform": ["instagram"],
                                 },
                             },
                             values: [
@@ -987,10 +943,8 @@ class InfluencersClub {
                             name: "youtubeFilters",
                             displayName: "YouTube Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["instagram", "tiktok", "twitch", "twitter", "onlyfans"],
+                                show: {
+                                    "/platform": ["youtube"],
                                 },
                             },
                             values: [
@@ -1307,10 +1261,8 @@ class InfluencersClub {
                             name: "tiktokFilters",
                             displayName: "TikTok Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["instagram", "youtube", "twitch", "twitter", "onlyfans"],
+                                show: {
+                                    "/platform": ["tiktok"],
                                 },
                             },
                             values: [
@@ -1509,10 +1461,8 @@ class InfluencersClub {
                             name: "twitterFilters",
                             displayName: "Twitter Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["instagram", "youtube", "tiktok", "twitch", "onlyfans"],
+                                show: {
+                                    "/platform": ["twitter"],
                                 },
                             },
                             values: [
@@ -1628,10 +1578,8 @@ class InfluencersClub {
                             name: "onlyfansFilters",
                             displayName: "OnlyFans Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["instagram", "youtube", "tiktok", "twitch", "twitter"],
+                                show: {
+                                    "/platform": ["onlyfans"],
                                 },
                             },
                             values: [
@@ -1719,10 +1667,8 @@ class InfluencersClub {
                             name: "twitchFilters",
                             displayName: "Twitch Filters",
                             displayOptions: {
-                                hide: {
-                                    resource: ["discovery"],
-                                    operation: ["discovery"],
-                                    discovery_platform: ["instagram", "youtube", "tiktok", "twitter", "onlyfans"],
+                                show: {
+                                    "/platform": ["twitch"],
                                 },
                             },
                             values: [
@@ -1840,9 +1786,295 @@ class InfluencersClub {
             ],
         };
     }
+    static buildApiFilters(ctx, platform, itemIndex) {
+        var _a, _b, _c, _d, _e, _f;
+        const getParam = (path, fallback = {}) => {
+            const raw = ctx.getNodeParameter(path, itemIndex, fallback);
+            return (Array.isArray(raw) && raw.length ? raw[0] : raw);
+        };
+        const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
+        const sharedFilters = getParam("advancedFilters.filters");
+        const instagramFilters = getParam("advancedFilters.instagramFilters");
+        const youtubeFilters = getParam("advancedFilters.youtubeFilters");
+        const tiktokFilters = getParam("advancedFilters.tiktokFilters");
+        const twitterFilters = getParam("advancedFilters.twitterFilters");
+        const onlyfansFilters = getParam("advancedFilters.onlyfansFilters");
+        const twitchFilters = getParam("advancedFilters.twitchFilters");
+        const apiFilters = {};
+        // Shared filters
+        if (sharedFilters.location && sharedFilters.location !== "")
+            apiFilters.location = commaToArray(sharedFilters.location);
+        if (sharedFilters.type && sharedFilters.type !== "" && ["instagram", "youtube", "tiktok"].includes(platform))
+            apiFilters.type = sharedFilters.type;
+        if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business")
+            apiFilters.gender = sharedFilters.gender;
+        if (sharedFilters.profile_language && sharedFilters.profile_language !== "")
+            apiFilters.profile_language = commaToArray(sharedFilters.profile_language);
+        if (sharedFilters.promotes_affiliate_links !== undefined)
+            apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
+        if (sharedFilters.has_done_brand_deals !== undefined)
+            apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
+        if (sharedFilters.has_link_in_bio !== undefined)
+            apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
+        if (sharedFilters.does_live_streaming !== undefined)
+            apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
+        if (sharedFilters.has_merch !== undefined)
+            apiFilters.has_merch = sharedFilters.has_merch;
+        if (sharedFilters.brands && typeof sharedFilters.brands === "string")
+            apiFilters.brands = commaToArray(sharedFilters.brands);
+        if (sharedFilters.exclude_role_based_emails !== undefined)
+            apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
+        if (sharedFilters.exclude_previous !== undefined)
+            apiFilters.exclude_previous = sharedFilters.exclude_previous;
+        const creatorHas = ctx.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []);
+        if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
+            apiFilters.creator_has = {};
+            for (const entry of creatorHas) {
+                for (const [key, value] of Object.entries(entry)) {
+                    apiFilters.creator_has[`has_${key}`] = value;
+                }
+            }
+        }
+        // Platform-specific filters
+        if (platform === "instagram") {
+            if (instagramFilters.min_followers || instagramFilters.max_followers)
+                apiFilters.number_of_followers = { min: instagramFilters.min_followers || null, max: instagramFilters.max_followers || null };
+            if (instagramFilters.posting_frequency)
+                apiFilters.posting_frequency = instagramFilters.posting_frequency;
+            if (instagramFilters.follower_growth_percentage || instagramFilters.follower_growth_time_range_months)
+                apiFilters.follower_growth = { growth_percentage: instagramFilters.follower_growth_percentage || null, time_range_months: instagramFilters.follower_growth_time_range_months || 3 };
+            if (instagramFilters.min_number_of_posts || instagramFilters.max_number_of_posts)
+                apiFilters.number_of_posts = { min: instagramFilters.min_number_of_posts || null, max: instagramFilters.max_number_of_posts || null };
+            if (instagramFilters.min_average_likes || instagramFilters.max_average_likes)
+                apiFilters.average_likes = { min: instagramFilters.min_average_likes || null, max: instagramFilters.max_average_likes || null };
+            if (instagramFilters.min_average_comments || instagramFilters.max_average_comments)
+                apiFilters.average_comments = { min: instagramFilters.min_average_comments || null, max: instagramFilters.max_average_comments || null };
+            if (instagramFilters.min_reels_percent || instagramFilters.max_reels_percent)
+                apiFilters.reels_percent = { min: instagramFilters.min_reels_percent || null, max: instagramFilters.max_reels_percent || null };
+            if (instagramFilters.min_average_views_for_reels || instagramFilters.max_average_views_for_reels)
+                apiFilters.average_views_for_reels = { min: instagramFilters.min_average_views_for_reels || null, max: instagramFilters.max_average_views_for_reels || null };
+            if (instagramFilters.min_income || instagramFilters.max_income)
+                apiFilters.income = { min: instagramFilters.min_income || null, max: instagramFilters.max_income || null };
+            if (instagramFilters.min_video_percentage || instagramFilters.max_video_percentage)
+                apiFilters.video_percentage = { min: instagramFilters.min_video_percentage || null, max: instagramFilters.max_video_percentage || null };
+            if (instagramFilters.exclude_private_profile !== undefined)
+                apiFilters.exclude_private_profile = instagramFilters.exclude_private_profile;
+            if (instagramFilters.is_verified !== undefined)
+                apiFilters.is_verified = instagramFilters.is_verified;
+            if (instagramFilters.has_videos !== undefined)
+                apiFilters.has_videos = instagramFilters.has_videos;
+            if (instagramFilters.last_post)
+                apiFilters.last_post = instagramFilters.last_post;
+            if (commaToArray(instagramFilters.keywords_in_bio))
+                apiFilters.keywords_in_bio = commaToArray(instagramFilters.keywords_in_bio);
+            if (commaToArray(instagramFilters.exclude_keywords_in_bio))
+                apiFilters.exclude_keywords_in_bio = commaToArray(instagramFilters.exclude_keywords_in_bio);
+            if (commaToArray(instagramFilters.similar_to))
+                apiFilters.similar_to = commaToArray(instagramFilters.similar_to);
+            if (commaToArray(instagramFilters.link_in_bio))
+                apiFilters.link_in_bio = commaToArray(instagramFilters.link_in_bio);
+            if (commaToArray(instagramFilters.hashtags))
+                apiFilters.hashtags = commaToArray(instagramFilters.hashtags);
+            if (commaToArray(instagramFilters.not_hashtags))
+                apiFilters.not_hashtags = commaToArray(instagramFilters.not_hashtags);
+            if (commaToArray(instagramFilters.keywords_in_captions))
+                apiFilters.keywords_in_captions = commaToArray(instagramFilters.keywords_in_captions);
+            if (instagramFilters.engagement_percent_min || instagramFilters.engagement_percent_max)
+                apiFilters.engagement_percent = { min: instagramFilters.engagement_percent_min || null, max: instagramFilters.engagement_percent_max || null };
+            if (instagramFilters.has_merch !== undefined)
+                apiFilters.has_merch = instagramFilters.has_merch;
+        }
+        if (platform === "youtube") {
+            if (youtubeFilters.min_subscribers || youtubeFilters.max_subscribers)
+                apiFilters.number_of_subscribers = { min: youtubeFilters.min_subscribers || null, max: youtubeFilters.max_subscribers || null };
+            if (commaToArray(youtubeFilters.topics))
+                apiFilters.topics = commaToArray(youtubeFilters.topics);
+            if (commaToArray(youtubeFilters.keywords_in_video_titles))
+                apiFilters.keywords_in_video_titles = commaToArray(youtubeFilters.keywords_in_video_titles);
+            if (commaToArray(youtubeFilters.keywords_in_description))
+                apiFilters.keywords_in_description = commaToArray(youtubeFilters.keywords_in_description);
+            if (commaToArray(youtubeFilters.keywords_not_in_description))
+                apiFilters.keywords_not_in_description = commaToArray(youtubeFilters.keywords_not_in_description);
+            if (commaToArray(youtubeFilters.keywords_in_video_description))
+                apiFilters.keywords_in_video_description = commaToArray(youtubeFilters.keywords_in_video_description);
+            if (commaToArray(youtubeFilters.keywords_not_in_video_description))
+                apiFilters.keywords_not_in_video_description = commaToArray(youtubeFilters.keywords_not_in_video_description);
+            if (commaToArray(youtubeFilters.links_from_description))
+                apiFilters.links_from_description = commaToArray(youtubeFilters.links_from_description);
+            if (commaToArray(youtubeFilters.hashtags))
+                apiFilters.hashtags = commaToArray(youtubeFilters.hashtags);
+            if (commaToArray(youtubeFilters.not_hashtags))
+                apiFilters.not_hashtags = commaToArray(youtubeFilters.not_hashtags);
+            if (commaToArray(youtubeFilters.links_from_video_description))
+                apiFilters.links_from_video_description = commaToArray(youtubeFilters.links_from_video_description);
+            if (youtubeFilters.posting_frequency)
+                apiFilters.posting_frequency = youtubeFilters.posting_frequency;
+            if (youtubeFilters.subscriber_growth_percentage || youtubeFilters.subscriber_growth_time_range_months)
+                apiFilters.subscriber_growth = { growth_percentage: youtubeFilters.subscriber_growth_percentage || null, time_range_months: youtubeFilters.subscriber_growth_time_range_months || 3 };
+            if (youtubeFilters.has_shorts !== undefined)
+                apiFilters.has_shorts = youtubeFilters.has_shorts;
+            if (youtubeFilters.min_shorts_percentage || youtubeFilters.max_shorts_percentage)
+                apiFilters.shorts_percentage = { min: youtubeFilters.min_shorts_percentage || null, max: youtubeFilters.max_shorts_percentage || null };
+            if (youtubeFilters.engagement_percent_min || youtubeFilters.engagement_percent_max)
+                apiFilters.engagement_percent = { min: youtubeFilters.engagement_percent_min || null, max: youtubeFilters.engagement_percent_max || null };
+            if (youtubeFilters.has_community_posts !== undefined)
+                apiFilters.has_community_posts = youtubeFilters.has_community_posts;
+            if (youtubeFilters.streams_live !== undefined)
+                apiFilters.streams_live = youtubeFilters.streams_live;
+            if (youtubeFilters.has_merch !== undefined)
+                apiFilters.has_merch = youtubeFilters.has_merch;
+            if (youtubeFilters.has_podcast !== undefined)
+                apiFilters.has_podcast = youtubeFilters.has_podcast;
+            if (youtubeFilters.has_courses !== undefined)
+                apiFilters.has_courses = youtubeFilters.has_courses;
+            if (youtubeFilters.has_membership !== undefined)
+                apiFilters.has_membership = youtubeFilters.has_membership;
+            if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos)
+                apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
+            if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null)
+                apiFilters.long_video_duration = { min: (_a = youtubeFilters.long_video_duration_min) !== null && _a !== void 0 ? _a : null, max: (_b = youtubeFilters.long_video_duration_max) !== null && _b !== void 0 ? _b : null };
+            if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts)
+                apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
+            if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos)
+                apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
+            if (youtubeFilters.is_monetizing !== undefined)
+                apiFilters.is_monetizing = youtubeFilters.is_monetizing;
+            if (commaToArray(youtubeFilters.similar_to))
+                apiFilters.similar_to = commaToArray(youtubeFilters.similar_to);
+            if (youtubeFilters.income_min || youtubeFilters.income_max)
+                apiFilters.income = { min: youtubeFilters.income_min || null, max: youtubeFilters.income_max || null };
+            if (youtubeFilters.last_upload_long_video)
+                apiFilters.last_upload_long_video = youtubeFilters.last_upload_long_video;
+            if (youtubeFilters.last_upload_short_video)
+                apiFilters.last_upload_short_video = youtubeFilters.last_upload_short_video;
+            if (youtubeFilters.last_stream_upload)
+                apiFilters.last_stream_upload = youtubeFilters.last_stream_upload;
+            if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max)
+                apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
+            if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null)
+                apiFilters.average_stream_duration = { min: (_c = youtubeFilters.average_stream_duration_min) !== null && _c !== void 0 ? _c : null, max: (_d = youtubeFilters.average_stream_duration_max) !== null && _d !== void 0 ? _d : null };
+            if (youtubeFilters.is_verified !== undefined)
+                apiFilters.is_verified = youtubeFilters.is_verified;
+        }
+        if (platform === "tiktok") {
+            if (tiktokFilters.number_of_followers_min || tiktokFilters.number_of_followers_max)
+                apiFilters.number_of_followers = { min: tiktokFilters.number_of_followers_min || null, max: tiktokFilters.number_of_followers_max || null };
+            if (tiktokFilters.posting_frequency)
+                apiFilters.posting_frequency = tiktokFilters.posting_frequency;
+            if (tiktokFilters.follower_growth_percentage || tiktokFilters.follower_growth_time_range_months)
+                apiFilters.follower_growth = { growth_percentage: tiktokFilters.follower_growth_percentage || null, time_range_months: tiktokFilters.follower_growth_time_range_months || 3 };
+            if (tiktokFilters.average_likes_min || tiktokFilters.average_likes_max)
+                apiFilters.average_likes = { min: tiktokFilters.average_likes_min || null, max: tiktokFilters.average_likes_max || null };
+            if (tiktokFilters.average_comments_min || tiktokFilters.average_comments_max)
+                apiFilters.average_comments = { min: tiktokFilters.average_comments_min || null, max: tiktokFilters.average_comments_max || null };
+            if (tiktokFilters.engagement_percent_min || tiktokFilters.engagement_percent_max)
+                apiFilters.engagement_percent = { min: tiktokFilters.engagement_percent_min || null, max: tiktokFilters.engagement_percent_max || null };
+            if (tiktokFilters.average_views_min || tiktokFilters.average_views_max)
+                apiFilters.average_views = { min: tiktokFilters.average_views_min || null, max: tiktokFilters.average_views_max || null };
+            if (tiktokFilters.average_video_downloads_min || tiktokFilters.average_video_downloads_max)
+                apiFilters.average_video_downloads = { min: tiktokFilters.average_video_downloads_min || null, max: tiktokFilters.average_video_downloads_max || null };
+            if (tiktokFilters.video_count_min || tiktokFilters.video_count_max)
+                apiFilters.video_count = { min: tiktokFilters.video_count_min || null, max: tiktokFilters.video_count_max || null };
+            if (tiktokFilters.has_tik_tok_shop !== undefined)
+                apiFilters.has_tik_tok_shop = tiktokFilters.has_tik_tok_shop;
+            if (tiktokFilters.exclude_private_profile !== undefined)
+                apiFilters.exclude_private_profile = tiktokFilters.exclude_private_profile;
+            if (tiktokFilters.is_verified !== undefined)
+                apiFilters.is_verified = tiktokFilters.is_verified;
+            if (commaToArray(tiktokFilters.similar_to))
+                apiFilters.similar_to = commaToArray(tiktokFilters.similar_to);
+            if (tiktokFilters.last_post)
+                apiFilters.last_post = tiktokFilters.last_post;
+            if (commaToArray(tiktokFilters.keywords_in_bio))
+                apiFilters.keywords_in_bio = commaToArray(tiktokFilters.keywords_in_bio);
+            if (commaToArray(tiktokFilters.exclude_keywords_in_bio))
+                apiFilters.exclude_keywords_in_bio = commaToArray(tiktokFilters.exclude_keywords_in_bio);
+            if (commaToArray(tiktokFilters.link_in_bio))
+                apiFilters.link_in_bio = commaToArray(tiktokFilters.link_in_bio);
+            if (commaToArray(tiktokFilters.hashtags))
+                apiFilters.hashtags = commaToArray(tiktokFilters.hashtags);
+            if (commaToArray(tiktokFilters.not_hashtags))
+                apiFilters.not_hashtags = commaToArray(tiktokFilters.not_hashtags);
+            if (commaToArray(tiktokFilters.video_description))
+                apiFilters.video_description = commaToArray(tiktokFilters.video_description);
+            if (commaToArray(tiktokFilters.not_video_description))
+                apiFilters.not_video_description = commaToArray(tiktokFilters.not_video_description);
+        }
+        if (platform === "twitter") {
+            if (twitterFilters.number_of_followers_min || twitterFilters.number_of_followers_max)
+                apiFilters.number_of_followers = { min: twitterFilters.number_of_followers_min || null, max: twitterFilters.number_of_followers_max || null };
+            if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max)
+                apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
+            if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null)
+                apiFilters.number_of_tweets = { min: (_e = twitterFilters.min_number_of_tweets) !== null && _e !== void 0 ? _e : null, max: (_f = twitterFilters.max_number_of_tweets) !== null && _f !== void 0 ? _f : null };
+            if (twitterFilters.average_likes_min || twitterFilters.average_likes_max)
+                apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
+            if (twitterFilters.last_post)
+                apiFilters.last_post = twitterFilters.last_post;
+            if (commaToArray(twitterFilters.similar_to))
+                apiFilters.similar_to = commaToArray(twitterFilters.similar_to);
+            if (commaToArray(twitterFilters.keywords_in_bio))
+                apiFilters.keywords_in_bio = commaToArray(twitterFilters.keywords_in_bio);
+            if (commaToArray(twitterFilters.exclude_keywords_in_bio))
+                apiFilters.exclude_keywords_in_bio = commaToArray(twitterFilters.exclude_keywords_in_bio);
+            if (commaToArray(twitterFilters.link_in_bio))
+                apiFilters.link_in_bio = commaToArray(twitterFilters.link_in_bio);
+            if (commaToArray(twitterFilters.hashtags))
+                apiFilters.hashtags = commaToArray(twitterFilters.hashtags);
+            if (commaToArray(twitterFilters.not_hashtags))
+                apiFilters.not_hashtags = commaToArray(twitterFilters.not_hashtags);
+            if (commaToArray(twitterFilters.keywords_in_tweets))
+                apiFilters.keywords_in_tweets = commaToArray(twitterFilters.keywords_in_tweets);
+        }
+        if (platform === "onlyfans") {
+            if (onlyfansFilters.subscription_price_min || onlyfansFilters.subscription_price_max)
+                apiFilters.subscription_price = { min: onlyfansFilters.subscription_price_min || null, max: onlyfansFilters.subscription_price_max || null };
+            if (onlyfansFilters.number_of_photos_min || onlyfansFilters.number_of_photos_max)
+                apiFilters.number_of_photos = { min: onlyfansFilters.number_of_photos_min || null, max: onlyfansFilters.number_of_photos_max || null };
+            if (onlyfansFilters.number_of_likes_min || onlyfansFilters.number_of_likes_max)
+                apiFilters.number_of_likes = { min: onlyfansFilters.number_of_likes_min || null, max: onlyfansFilters.number_of_likes_max || null };
+            if (onlyfansFilters.last_active)
+                apiFilters.last_active = onlyfansFilters.last_active;
+            if (commaToArray(onlyfansFilters.similar_to))
+                apiFilters.similar_to = commaToArray(onlyfansFilters.similar_to);
+            if (onlyfansFilters.has_videos !== undefined)
+                apiFilters.has_videos = onlyfansFilters.has_videos;
+            if (onlyfansFilters.has_free_account !== undefined)
+                apiFilters.has_free_account = onlyfansFilters.has_free_account;
+            if (onlyfansFilters.has_live_streams !== undefined)
+                apiFilters.has_live_streams = onlyfansFilters.has_live_streams;
+            if (onlyfansFilters.is_verified !== undefined)
+                apiFilters.is_verified = onlyfansFilters.is_verified;
+        }
+        if (platform === "twitch") {
+            if (twitchFilters.followers_min || twitchFilters.followers_max)
+                apiFilters.followers = { min: twitchFilters.followers_min || null, max: twitchFilters.followers_max || null };
+            if (twitchFilters.min_streamed_hours_last_30_days || twitchFilters.max_streamed_hours_last_30_days)
+                apiFilters.streamed_hours_last_30_days = { min: twitchFilters.min_streamed_hours_last_30_days || null, max: twitchFilters.max_streamed_hours_last_30_days || null };
+            if (twitchFilters.min_maximum_views_count || twitchFilters.max_maximum_views_count)
+                apiFilters.maximum_views_count = { min: twitchFilters.min_maximum_views_count || null, max: twitchFilters.max_maximum_views_count || null };
+            if (twitchFilters.min_avg_views_last_30_days || twitchFilters.max_avg_views_last_30_days)
+                apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
+            if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days)
+                apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
+            if (commaToArray(twitchFilters.games_played))
+                apiFilters.games_played = commaToArray(twitchFilters.games_played);
+            if (twitchFilters.is_twitch_partner !== undefined)
+                apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
+            if (twitchFilters.keywords_in_description !== undefined)
+                apiFilters.keywords_in_description = twitchFilters.keywords_in_description;
+            if (commaToArray(twitchFilters.similar_to))
+                apiFilters.similar_to = commaToArray(twitchFilters.similar_to);
+            if (twitchFilters.most_recent_stream_date)
+                apiFilters.most_recent_stream_date = twitchFilters.most_recent_stream_date;
+            if (commaToArray(twitchFilters.link_in_bio))
+                apiFilters.link_in_bio = commaToArray(twitchFilters.link_in_bio);
+        }
+        return apiFilters;
+    }
     // eslint-disable-next-line no-unused-vars
     async execute() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
         const items = this.getInputData();
         const outputItems = [];
         const nodeParams = this.getNode().parameters;
@@ -1910,301 +2142,11 @@ class InfluencersClub {
                         const ai_search = (_e = additionalOptions.ai_search) !== null && _e !== void 0 ? _e : "";
                         // Optional fields from Additional Options (fallback to legacy top-level for backward compat)
                         // Platform: top-level (Discovery) first, then Additional Options, then legacy
-                        const platform = this.getNodeParameter("discovery_platform", itemIndex, "")
-                            || additionalOptions.discovery_platform
-                            || nodeParams.discovery_platform
-                            || "instagram";
-                        // fixedCollection with multipleValues can return array; use first set
-                        const rawFilters = this.getNodeParameter("advancedFilters.filters", itemIndex, {});
-                        const sharedFilters = (Array.isArray(rawFilters) && rawFilters.length ? rawFilters[0] : rawFilters);
-                        const rawIg = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {});
-                        const instagramFilters = (Array.isArray(rawIg) && rawIg.length ? rawIg[0] : rawIg);
-                        const rawYt = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {});
-                        const youtubeFilters = (Array.isArray(rawYt) && rawYt.length ? rawYt[0] : rawYt);
-                        const rawTk = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {});
-                        const tiktokFilters = (Array.isArray(rawTk) && rawTk.length ? rawTk[0] : rawTk);
-                        const rawTw = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {});
-                        const twitterFilters = (Array.isArray(rawTw) && rawTw.length ? rawTw[0] : rawTw);
-                        const rawOf = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {});
-                        const onlyfansFilters = (Array.isArray(rawOf) && rawOf.length ? rawOf[0] : rawOf);
-                        const rawTc = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {});
-                        const twitchFilters = (Array.isArray(rawTc) && rawTc.length ? rawTc[0] : rawTc);
-                        // Build the correct API structure exactly as documented
-                        const apiFilters = {};
-                        // Shared filters (always visible)
-                        if (sharedFilters.location && sharedFilters.location !== "")
-                            apiFilters.location = String(sharedFilters.location).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.type && sharedFilters.type !== "" && ["instagram", "youtube", "tiktok"].includes(platform))
-                            apiFilters.type = sharedFilters.type;
-                        if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business")
-                            apiFilters.gender = sharedFilters.gender;
-                        if (sharedFilters.profile_language && sharedFilters.profile_language !== "")
-                            apiFilters.profile_language = String(sharedFilters.profile_language).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.promotes_affiliate_links !== undefined)
-                            apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
-                        if (sharedFilters.has_done_brand_deals !== undefined)
-                            apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
-                        if (sharedFilters.has_link_in_bio !== undefined)
-                            apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
-                        if (sharedFilters.does_live_streaming !== undefined)
-                            apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
-                        if (sharedFilters.has_merch !== undefined)
-                            apiFilters.has_merch = sharedFilters.has_merch;
-                        if (sharedFilters.brands && typeof sharedFilters.brands === "string")
-                            apiFilters.brands = String(sharedFilters.brands).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.exclude_role_based_emails !== undefined)
-                            apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
-                        if (sharedFilters.exclude_previous !== undefined)
-                            apiFilters.exclude_previous = sharedFilters.exclude_previous;
-                        const creatorHas = this.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []);
-                        if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
-                            apiFilters.creator_has = {};
-                            for (const entry of creatorHas) {
-                                for (const [key, value] of Object.entries(entry)) {
-                                    apiFilters.creator_has[`has_${key}`] = value;
-                                }
-                            }
-                        }
-                        // Platform-specific filters
-                        if (platform === "instagram") {
-                            if (instagramFilters.min_followers || instagramFilters.max_followers) {
-                                apiFilters.number_of_followers = { min: instagramFilters.min_followers || null, max: instagramFilters.max_followers || null };
-                            }
-                            if (instagramFilters.posting_frequency)
-                                apiFilters.posting_frequency = instagramFilters.posting_frequency;
-                            if (instagramFilters.follower_growth_percentage || instagramFilters.follower_growth_time_range_months) {
-                                apiFilters.follower_growth = { growth_percentage: instagramFilters.follower_growth_percentage || null, time_range_months: instagramFilters.follower_growth_time_range_months || 3 };
-                            }
-                            if (instagramFilters.min_number_of_posts || instagramFilters.max_number_of_posts)
-                                apiFilters.number_of_posts = { min: instagramFilters.min_number_of_posts || null, max: instagramFilters.max_number_of_posts || null };
-                            if (instagramFilters.min_average_likes || instagramFilters.max_average_likes)
-                                apiFilters.average_likes = { min: instagramFilters.min_average_likes || null, max: instagramFilters.max_average_likes || null };
-                            if (instagramFilters.min_average_comments || instagramFilters.max_average_comments)
-                                apiFilters.average_comments = { min: instagramFilters.min_average_comments || null, max: instagramFilters.max_average_comments || null };
-                            if (instagramFilters.min_reels_percent || instagramFilters.max_reels_percent)
-                                apiFilters.reels_percent = { min: instagramFilters.min_reels_percent || null, max: instagramFilters.max_reels_percent || null };
-                            if (instagramFilters.min_average_views_for_reels || instagramFilters.max_average_views_for_reels)
-                                apiFilters.average_views_for_reels = { min: instagramFilters.min_average_views_for_reels || null, max: instagramFilters.max_average_views_for_reels || null };
-                            if (instagramFilters.min_income || instagramFilters.max_income)
-                                apiFilters.income = { min: instagramFilters.min_income || null, max: instagramFilters.max_income || null };
-                            if (instagramFilters.min_video_percentage || instagramFilters.max_video_percentage)
-                                apiFilters.video_percentage = { min: instagramFilters.min_video_percentage || null, max: instagramFilters.max_video_percentage || null };
-                            if (instagramFilters.exclude_private_profile !== undefined)
-                                apiFilters.exclude_private_profile = instagramFilters.exclude_private_profile;
-                            if (instagramFilters.is_verified !== undefined)
-                                apiFilters.is_verified = instagramFilters.is_verified;
-                            if (instagramFilters.has_videos !== undefined)
-                                apiFilters.has_videos = instagramFilters.has_videos;
-                            if (instagramFilters.last_post)
-                                apiFilters.last_post = instagramFilters.last_post;
-                            if (instagramFilters.keywords_in_bio && typeof instagramFilters.keywords_in_bio === "string")
-                                apiFilters.keywords_in_bio = String(instagramFilters.keywords_in_bio).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.exclude_keywords_in_bio && typeof instagramFilters.exclude_keywords_in_bio === "string")
-                                apiFilters.exclude_keywords_in_bio = String(instagramFilters.exclude_keywords_in_bio).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.similar_to && typeof instagramFilters.similar_to === "string")
-                                apiFilters.similar_to = String(instagramFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.link_in_bio && typeof instagramFilters.link_in_bio === "string")
-                                apiFilters.link_in_bio = String(instagramFilters.link_in_bio).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.hashtags && typeof instagramFilters.hashtags === "string")
-                                apiFilters.hashtags = String(instagramFilters.hashtags).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.not_hashtags && typeof instagramFilters.not_hashtags === "string")
-                                apiFilters.not_hashtags = String(instagramFilters.not_hashtags).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.keywords_in_captions && typeof instagramFilters.keywords_in_captions === "string")
-                                apiFilters.keywords_in_captions = String(instagramFilters.keywords_in_captions).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (instagramFilters.engagement_percent_min || instagramFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: instagramFilters.engagement_percent_min || null, max: instagramFilters.engagement_percent_max || null };
-                        }
-                        if (platform === "youtube") {
-                            if (youtubeFilters.min_subscribers || youtubeFilters.max_subscribers)
-                                apiFilters.number_of_subscribers = { min: youtubeFilters.min_subscribers || null, max: youtubeFilters.max_subscribers || null };
-                            if (youtubeFilters.topics && typeof youtubeFilters.topics === "string")
-                                apiFilters.topics = String(youtubeFilters.topics).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.keywords_in_video_titles && typeof youtubeFilters.keywords_in_video_titles === "string")
-                                apiFilters.keywords_in_video_titles = String(youtubeFilters.keywords_in_video_titles).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.keywords_in_description && typeof youtubeFilters.keywords_in_description === "string")
-                                apiFilters.keywords_in_description = String(youtubeFilters.keywords_in_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.keywords_not_in_description && typeof youtubeFilters.keywords_not_in_description === "string")
-                                apiFilters.keywords_not_in_description = String(youtubeFilters.keywords_not_in_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.keywords_in_video_description && typeof youtubeFilters.keywords_in_video_description === "string")
-                                apiFilters.keywords_in_video_description = String(youtubeFilters.keywords_in_video_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.keywords_not_in_video_description && typeof youtubeFilters.keywords_not_in_video_description === "string")
-                                apiFilters.keywords_not_in_video_description = String(youtubeFilters.keywords_not_in_video_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.links_from_description && typeof youtubeFilters.links_from_description === "string")
-                                apiFilters.links_from_description = String(youtubeFilters.links_from_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.hashtags && typeof youtubeFilters.hashtags === "string")
-                                apiFilters.hashtags = String(youtubeFilters.hashtags).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.not_hashtags && typeof youtubeFilters.not_hashtags === "string")
-                                apiFilters.not_hashtags = String(youtubeFilters.not_hashtags).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.links_from_video_description && typeof youtubeFilters.links_from_video_description === "string")
-                                apiFilters.links_from_video_description = String(youtubeFilters.links_from_video_description).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.posting_frequency)
-                                apiFilters.posting_frequency = youtubeFilters.posting_frequency;
-                            if (youtubeFilters.subscriber_growth_percentage || youtubeFilters.subscriber_growth_time_range_months)
-                                apiFilters.subscriber_growth = { growth_percentage: youtubeFilters.subscriber_growth_percentage || null, time_range_months: youtubeFilters.subscriber_growth_time_range_months || 3 };
-                            if (youtubeFilters.has_shorts !== undefined)
-                                apiFilters.has_shorts = youtubeFilters.has_shorts;
-                            if (youtubeFilters.min_shorts_percentage || youtubeFilters.max_shorts_percentage)
-                                apiFilters.shorts_percentage = { min: youtubeFilters.min_shorts_percentage || null, max: youtubeFilters.max_shorts_percentage || null };
-                            if (youtubeFilters.engagement_percent_min || youtubeFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: youtubeFilters.engagement_percent_min || null, max: youtubeFilters.engagement_percent_max || null };
-                            if (youtubeFilters.has_community_posts !== undefined)
-                                apiFilters.has_community_posts = youtubeFilters.has_community_posts;
-                            if (youtubeFilters.streams_live !== undefined)
-                                apiFilters.streams_live = youtubeFilters.streams_live;
-                            if (youtubeFilters.has_merch !== undefined)
-                                apiFilters.has_merch = youtubeFilters.has_merch;
-                            if (youtubeFilters.has_podcast !== undefined)
-                                apiFilters.has_podcast = youtubeFilters.has_podcast;
-                            if (youtubeFilters.has_courses !== undefined)
-                                apiFilters.has_courses = youtubeFilters.has_courses;
-                            if (youtubeFilters.has_membership !== undefined)
-                                apiFilters.has_membership = youtubeFilters.has_membership;
-                            if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos)
-                                apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
-                            if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null)
-                                apiFilters.long_video_duration = { min: (_f = youtubeFilters.long_video_duration_min) !== null && _f !== void 0 ? _f : null, max: (_g = youtubeFilters.long_video_duration_max) !== null && _g !== void 0 ? _g : null };
-                            if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts)
-                                apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
-                            if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos)
-                                apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
-                            if (youtubeFilters.is_monetizing !== undefined)
-                                apiFilters.is_monetizing = youtubeFilters.is_monetizing;
-                            if (youtubeFilters.similar_to && typeof youtubeFilters.similar_to === "string")
-                                apiFilters.similar_to = String(youtubeFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (youtubeFilters.income_min || youtubeFilters.income_max)
-                                apiFilters.income = { min: youtubeFilters.income_min || null, max: youtubeFilters.income_max || null };
-                            if (youtubeFilters.last_upload_long_video)
-                                apiFilters.last_upload_long_video = youtubeFilters.last_upload_long_video;
-                            if (youtubeFilters.last_upload_short_video)
-                                apiFilters.last_upload_short_video = youtubeFilters.last_upload_short_video;
-                            if (youtubeFilters.last_stream_upload)
-                                apiFilters.last_stream_upload = youtubeFilters.last_stream_upload;
-                            if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max)
-                                apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
-                            if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null)
-                                apiFilters.average_stream_duration = { min: (_h = youtubeFilters.average_stream_duration_min) !== null && _h !== void 0 ? _h : null, max: (_j = youtubeFilters.average_stream_duration_max) !== null && _j !== void 0 ? _j : null };
-                            if (youtubeFilters.is_verified !== undefined)
-                                apiFilters.is_verified = youtubeFilters.is_verified;
-                        }
-                        if (platform === "tiktok") {
-                            if (tiktokFilters.number_of_followers_min || tiktokFilters.number_of_followers_max)
-                                apiFilters.number_of_followers = { min: tiktokFilters.number_of_followers_min || null, max: tiktokFilters.number_of_followers_max || null };
-                            if (tiktokFilters.posting_frequency)
-                                apiFilters.posting_frequency = tiktokFilters.posting_frequency;
-                            if (tiktokFilters.follower_growth_percentage || tiktokFilters.follower_growth_time_range_months)
-                                apiFilters.follower_growth = { growth_percentage: tiktokFilters.follower_growth_percentage || null, time_range_months: tiktokFilters.follower_growth_time_range_months || 3 };
-                            if (tiktokFilters.average_likes_min || tiktokFilters.average_likes_max)
-                                apiFilters.average_likes = { min: tiktokFilters.average_likes_min || null, max: tiktokFilters.average_likes_max || null };
-                            if (tiktokFilters.average_comments_min || tiktokFilters.average_comments_max)
-                                apiFilters.average_comments = { min: tiktokFilters.average_comments_min || null, max: tiktokFilters.average_comments_max || null };
-                            if (tiktokFilters.engagement_percent_min || tiktokFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: tiktokFilters.engagement_percent_min || null, max: tiktokFilters.engagement_percent_max || null };
-                            if (tiktokFilters.average_views_min || tiktokFilters.average_views_max)
-                                apiFilters.average_views = { min: tiktokFilters.average_views_min || null, max: tiktokFilters.average_views_max || null };
-                            if (tiktokFilters.average_video_downloads_min || tiktokFilters.average_video_downloads_max)
-                                apiFilters.average_video_downloads = { min: tiktokFilters.average_video_downloads_min || null, max: tiktokFilters.average_video_downloads_max || null };
-                            if (tiktokFilters.video_count_min || tiktokFilters.video_count_max)
-                                apiFilters.video_count = { min: tiktokFilters.video_count_min || null, max: tiktokFilters.video_count_max || null };
-                            if (tiktokFilters.has_tik_tok_shop !== undefined)
-                                apiFilters.has_tik_tok_shop = tiktokFilters.has_tik_tok_shop;
-                            if (tiktokFilters.exclude_private_profile !== undefined)
-                                apiFilters.exclude_private_profile = tiktokFilters.exclude_private_profile;
-                            if (tiktokFilters.is_verified !== undefined)
-                                apiFilters.is_verified = tiktokFilters.is_verified;
-                            if (tiktokFilters.similar_to && typeof tiktokFilters.similar_to === "string")
-                                apiFilters.similar_to = String(tiktokFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (tiktokFilters.last_post)
-                                apiFilters.last_post = tiktokFilters.last_post;
-                            const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
-                            if (commaToArray(tiktokFilters.keywords_in_bio))
-                                apiFilters.keywords_in_bio = commaToArray(tiktokFilters.keywords_in_bio);
-                            if (commaToArray(tiktokFilters.exclude_keywords_in_bio))
-                                apiFilters.exclude_keywords_in_bio = commaToArray(tiktokFilters.exclude_keywords_in_bio);
-                            if (commaToArray(tiktokFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(tiktokFilters.link_in_bio);
-                            if (commaToArray(tiktokFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(tiktokFilters.hashtags);
-                            if (commaToArray(tiktokFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(tiktokFilters.not_hashtags);
-                            if (commaToArray(tiktokFilters.video_description))
-                                apiFilters.video_description = commaToArray(tiktokFilters.video_description);
-                            if (commaToArray(tiktokFilters.not_video_description))
-                                apiFilters.not_video_description = commaToArray(tiktokFilters.not_video_description);
-                        }
-                        if (platform === "twitter") {
-                            if (twitterFilters.number_of_followers_min || twitterFilters.number_of_followers_max)
-                                apiFilters.number_of_followers = { min: twitterFilters.number_of_followers_min || null, max: twitterFilters.number_of_followers_max || null };
-                            if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
-                            if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null)
-                                apiFilters.number_of_tweets = { min: (_k = twitterFilters.min_number_of_tweets) !== null && _k !== void 0 ? _k : null, max: (_l = twitterFilters.max_number_of_tweets) !== null && _l !== void 0 ? _l : null };
-                            if (twitterFilters.average_likes_min || twitterFilters.average_likes_max)
-                                apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
-                            if (twitterFilters.last_post)
-                                apiFilters.last_post = twitterFilters.last_post;
-                            if (twitterFilters.similar_to && typeof twitterFilters.similar_to === "string")
-                                apiFilters.similar_to = String(twitterFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
-                            if (commaToArray(twitterFilters.keywords_in_bio))
-                                apiFilters.keywords_in_bio = commaToArray(twitterFilters.keywords_in_bio);
-                            if (commaToArray(twitterFilters.exclude_keywords_in_bio))
-                                apiFilters.exclude_keywords_in_bio = commaToArray(twitterFilters.exclude_keywords_in_bio);
-                            if (commaToArray(twitterFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(twitterFilters.link_in_bio);
-                            if (commaToArray(twitterFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(twitterFilters.hashtags);
-                            if (commaToArray(twitterFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(twitterFilters.not_hashtags);
-                            if (commaToArray(twitterFilters.keywords_in_tweets))
-                                apiFilters.keywords_in_tweets = commaToArray(twitterFilters.keywords_in_tweets);
-                        }
-                        if (platform === "onlyfans") {
-                            if (onlyfansFilters.subscription_price_min || onlyfansFilters.subscription_price_max)
-                                apiFilters.subscription_price = { min: onlyfansFilters.subscription_price_min || null, max: onlyfansFilters.subscription_price_max || null };
-                            if (onlyfansFilters.number_of_photos_min || onlyfansFilters.number_of_photos_max)
-                                apiFilters.number_of_photos = { min: onlyfansFilters.number_of_photos_min || null, max: onlyfansFilters.number_of_photos_max || null };
-                            if (onlyfansFilters.number_of_likes_min || onlyfansFilters.number_of_likes_max)
-                                apiFilters.number_of_likes = { min: onlyfansFilters.number_of_likes_min || null, max: onlyfansFilters.number_of_likes_max || null };
-                            if (onlyfansFilters.last_active)
-                                apiFilters.last_active = onlyfansFilters.last_active;
-                            if (onlyfansFilters.similar_to && typeof onlyfansFilters.similar_to === "string")
-                                apiFilters.similar_to = String(onlyfansFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (onlyfansFilters.has_videos !== undefined)
-                                apiFilters.has_videos = onlyfansFilters.has_videos;
-                            if (onlyfansFilters.has_free_account !== undefined)
-                                apiFilters.has_free_account = onlyfansFilters.has_free_account;
-                            if (onlyfansFilters.has_live_streams !== undefined)
-                                apiFilters.has_live_streams = onlyfansFilters.has_live_streams;
-                            if (onlyfansFilters.is_verified !== undefined)
-                                apiFilters.is_verified = onlyfansFilters.is_verified;
-                        }
-                        if (platform === "twitch") {
-                            if (twitchFilters.followers_min || twitchFilters.followers_max)
-                                apiFilters.followers = { min: twitchFilters.followers_min || null, max: twitchFilters.followers_max || null };
-                            if (twitchFilters.min_streamed_hours_last_30_days || twitchFilters.max_streamed_hours_last_30_days)
-                                apiFilters.streamed_hours_last_30_days = { min: twitchFilters.min_streamed_hours_last_30_days || null, max: twitchFilters.max_streamed_hours_last_30_days || null };
-                            if (twitchFilters.min_maximum_views_count || twitchFilters.max_maximum_views_count)
-                                apiFilters.maximum_views_count = { min: twitchFilters.min_maximum_views_count || null, max: twitchFilters.max_maximum_views_count || null };
-                            if (twitchFilters.min_avg_views_last_30_days || twitchFilters.max_avg_views_last_30_days)
-                                apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
-                            if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days)
-                                apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
-                            if (twitchFilters.games_played && typeof twitchFilters.games_played === "string")
-                                apiFilters.games_played = String(twitchFilters.games_played).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (twitchFilters.is_twitch_partner !== undefined)
-                                apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
-                            if (twitchFilters.keywords_in_description !== undefined)
-                                apiFilters.keywords_in_description = twitchFilters.keywords_in_description;
-                            if (twitchFilters.similar_to && typeof twitchFilters.similar_to === "string")
-                                apiFilters.similar_to = String(twitchFilters.similar_to).split(",").map((k) => k.trim()).filter(Boolean);
-                            if (twitchFilters.most_recent_stream_date)
-                                apiFilters.most_recent_stream_date = twitchFilters.most_recent_stream_date;
-                            if (twitchFilters.link_in_bio && typeof twitchFilters.link_in_bio === "string")
-                                apiFilters.link_in_bio = String(twitchFilters.link_in_bio).split(",").map((k) => k.trim()).filter(Boolean);
-                        }
+                        const platform = this.getNodeParameter("platform", itemIndex, "instagram");
+                        const apiFilters = InfluencersClub.buildApiFilters(this, platform, itemIndex);
                         // Paging & sort: top-level first, then Additional Options, then legacy
-                        const discoveryLimit = (_p = (_o = (_m = this.getNodeParameter("discovery_limit", itemIndex, undefined)) !== null && _m !== void 0 ? _m : additionalOptions.discovery_limit) !== null && _o !== void 0 ? _o : nodeParams.discovery_limit) !== null && _p !== void 0 ? _p : 5;
-                        const discoveryPage = (_s = (_r = (_q = this.getNodeParameter("discovery_page", itemIndex, undefined)) !== null && _q !== void 0 ? _q : additionalOptions.discovery_page) !== null && _r !== void 0 ? _r : nodeParams.discovery_page) !== null && _s !== void 0 ? _s : 0;
+                        const discoveryLimit = (_h = (_g = (_f = this.getNodeParameter("discovery_limit", itemIndex, undefined)) !== null && _f !== void 0 ? _f : additionalOptions.discovery_limit) !== null && _g !== void 0 ? _g : nodeParams.discovery_limit) !== null && _h !== void 0 ? _h : 5;
+                        const discoveryPage = (_l = (_k = (_j = this.getNodeParameter("discovery_page", itemIndex, undefined)) !== null && _j !== void 0 ? _j : additionalOptions.discovery_page) !== null && _k !== void 0 ? _k : nodeParams.discovery_page) !== null && _l !== void 0 ? _l : 0;
                         const sortBy = this.getNodeParameter("discovery_sort_by", itemIndex, "")
                             || additionalOptions.discovery_sort_by || nodeParams.discovery_sort_by || "relevancy";
                         const body = {
@@ -2234,298 +2176,11 @@ class InfluencersClub {
                         const filter_value = this.getNodeParameter("filter_value", itemIndex);
                         const filter_key = this.getNodeParameter("filter_key", itemIndex);
                         // Platform: top-level first, then Additional Options, then legacy
-                        const platform = this.getNodeParameter("lookalikes_platform", itemIndex, "")
-                            || additionalOptions.lookalikes_platform
-                            || nodeParams.lookalikes_platform
-                            || "instagram";
-                        const ai_search = (_t = additionalOptions.ai_search) !== null && _t !== void 0 ? _t : "";
-                        // fixedCollection with multipleValues can return array; use first set
-                        const rawFiltersL = this.getNodeParameter("advancedFilters.filters", itemIndex, {});
-                        const sharedFilters = (Array.isArray(rawFiltersL) && rawFiltersL.length ? rawFiltersL[0] : rawFiltersL);
-                        const rawIgL = this.getNodeParameter("advancedFilters.instagramFilters", itemIndex, {});
-                        const instagramFilters = (Array.isArray(rawIgL) && rawIgL.length ? rawIgL[0] : rawIgL);
-                        const rawYtL = this.getNodeParameter("advancedFilters.youtubeFilters", itemIndex, {});
-                        const youtubeFilters = (Array.isArray(rawYtL) && rawYtL.length ? rawYtL[0] : rawYtL);
-                        const rawTkL = this.getNodeParameter("advancedFilters.tiktokFilters", itemIndex, {});
-                        const tiktokFilters = (Array.isArray(rawTkL) && rawTkL.length ? rawTkL[0] : rawTkL);
-                        const rawTwL = this.getNodeParameter("advancedFilters.twitterFilters", itemIndex, {});
-                        const twitterFilters = (Array.isArray(rawTwL) && rawTwL.length ? rawTwL[0] : rawTwL);
-                        const rawOfL = this.getNodeParameter("advancedFilters.onlyfansFilters", itemIndex, {});
-                        const onlyfansFilters = (Array.isArray(rawOfL) && rawOfL.length ? rawOfL[0] : rawOfL);
-                        const rawTcL = this.getNodeParameter("advancedFilters.twitchFilters", itemIndex, {});
-                        const twitchFilters = (Array.isArray(rawTcL) && rawTcL.length ? rawTcL[0] : rawTcL);
-                        // Reuse discovery filter mapping
-                        const apiFilters = {};
-                        if (sharedFilters.location && sharedFilters.location !== "")
-                            apiFilters.location = String(sharedFilters.location).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.type && sharedFilters.type !== "" && ["instagram", "youtube", "tiktok"].includes(platform))
-                            apiFilters.type = sharedFilters.type;
-                        if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business")
-                            apiFilters.gender = sharedFilters.gender;
-                        if (sharedFilters.profile_language && sharedFilters.profile_language !== "")
-                            apiFilters.profile_language = String(sharedFilters.profile_language).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.promotes_affiliate_links !== undefined)
-                            apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
-                        if (sharedFilters.has_done_brand_deals !== undefined)
-                            apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
-                        if (sharedFilters.has_link_in_bio !== undefined)
-                            apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
-                        if (sharedFilters.does_live_streaming !== undefined)
-                            apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
-                        if (sharedFilters.has_merch !== undefined)
-                            apiFilters.has_merch = sharedFilters.has_merch;
-                        if (sharedFilters.brands && typeof sharedFilters.brands === "string")
-                            apiFilters.brands = String(sharedFilters.brands).split(",").map((s) => s.trim()).filter(Boolean);
-                        if (sharedFilters.exclude_role_based_emails !== undefined)
-                            apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
-                        if (sharedFilters.exclude_previous !== undefined)
-                            apiFilters.exclude_previous = sharedFilters.exclude_previous;
-                        const creatorHas = this.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []);
-                        if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
-                            apiFilters.creator_has = {};
-                            for (const entry of creatorHas) {
-                                for (const [key, value] of Object.entries(entry)) {
-                                    apiFilters.creator_has[`has_${key}`] = value;
-                                }
-                            }
-                        }
-                        const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
-                        if (platform === "instagram") {
-                            if (instagramFilters.min_followers || instagramFilters.max_followers)
-                                apiFilters.number_of_followers = { min: instagramFilters.min_followers || null, max: instagramFilters.max_followers || null };
-                            if (instagramFilters.posting_frequency)
-                                apiFilters.posting_frequency = instagramFilters.posting_frequency;
-                            if (instagramFilters.follower_growth_percentage || instagramFilters.follower_growth_time_range_months)
-                                apiFilters.follower_growth = { growth_percentage: instagramFilters.follower_growth_percentage || null, time_range_months: instagramFilters.follower_growth_time_range_months || 3 };
-                            if (instagramFilters.min_number_of_posts || instagramFilters.max_number_of_posts)
-                                apiFilters.number_of_posts = { min: instagramFilters.min_number_of_posts || null, max: instagramFilters.max_number_of_posts || null };
-                            if (instagramFilters.min_average_likes || instagramFilters.max_average_likes)
-                                apiFilters.average_likes = { min: instagramFilters.min_average_likes || null, max: instagramFilters.max_average_likes || null };
-                            if (instagramFilters.min_average_comments || instagramFilters.max_average_comments)
-                                apiFilters.average_comments = { min: instagramFilters.min_average_comments || null, max: instagramFilters.max_average_comments || null };
-                            if (instagramFilters.min_reels_percent || instagramFilters.max_reels_percent)
-                                apiFilters.reels_percent = { min: instagramFilters.min_reels_percent || null, max: instagramFilters.max_reels_percent || null };
-                            if (instagramFilters.min_average_views_for_reels || instagramFilters.max_average_views_for_reels)
-                                apiFilters.average_views_for_reels = { min: instagramFilters.min_average_views_for_reels || null, max: instagramFilters.max_average_views_for_reels || null };
-                            if (instagramFilters.min_income || instagramFilters.max_income)
-                                apiFilters.income = { min: instagramFilters.min_income || null, max: instagramFilters.max_income || null };
-                            if (instagramFilters.min_video_percentage || instagramFilters.max_video_percentage)
-                                apiFilters.video_percentage = { min: instagramFilters.min_video_percentage || null, max: instagramFilters.max_video_percentage || null };
-                            if (instagramFilters.exclude_private_profile !== undefined)
-                                apiFilters.exclude_private_profile = instagramFilters.exclude_private_profile;
-                            if (instagramFilters.is_verified !== undefined)
-                                apiFilters.is_verified = instagramFilters.is_verified;
-                            if (instagramFilters.has_videos !== undefined)
-                                apiFilters.has_videos = instagramFilters.has_videos;
-                            if (instagramFilters.last_post)
-                                apiFilters.last_post = instagramFilters.last_post;
-                            if (commaToArray(instagramFilters.keywords_in_bio))
-                                apiFilters.keywords_in_bio = commaToArray(instagramFilters.keywords_in_bio);
-                            if (commaToArray(instagramFilters.exclude_keywords_in_bio))
-                                apiFilters.exclude_keywords_in_bio = commaToArray(instagramFilters.exclude_keywords_in_bio);
-                            if (commaToArray(instagramFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(instagramFilters.similar_to);
-                            if (commaToArray(instagramFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(instagramFilters.link_in_bio);
-                            if (commaToArray(instagramFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(instagramFilters.hashtags);
-                            if (commaToArray(instagramFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(instagramFilters.not_hashtags);
-                            if (commaToArray(instagramFilters.keywords_in_captions))
-                                apiFilters.keywords_in_captions = commaToArray(instagramFilters.keywords_in_captions);
-                            if (instagramFilters.engagement_percent_min || instagramFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: instagramFilters.engagement_percent_min || null, max: instagramFilters.engagement_percent_max || null };
-                        }
-                        if (platform === "youtube") {
-                            if (youtubeFilters.min_subscribers || youtubeFilters.max_subscribers)
-                                apiFilters.number_of_subscribers = { min: youtubeFilters.min_subscribers || null, max: youtubeFilters.max_subscribers || null };
-                            if (commaToArray(youtubeFilters.topics))
-                                apiFilters.topics = commaToArray(youtubeFilters.topics);
-                            if (commaToArray(youtubeFilters.keywords_in_video_titles))
-                                apiFilters.keywords_in_video_titles = commaToArray(youtubeFilters.keywords_in_video_titles);
-                            if (commaToArray(youtubeFilters.keywords_in_description))
-                                apiFilters.keywords_in_description = commaToArray(youtubeFilters.keywords_in_description);
-                            if (commaToArray(youtubeFilters.keywords_not_in_description))
-                                apiFilters.keywords_not_in_description = commaToArray(youtubeFilters.keywords_not_in_description);
-                            if (commaToArray(youtubeFilters.keywords_in_video_description))
-                                apiFilters.keywords_in_video_description = commaToArray(youtubeFilters.keywords_in_video_description);
-                            if (commaToArray(youtubeFilters.keywords_not_in_video_description))
-                                apiFilters.keywords_not_in_video_description = commaToArray(youtubeFilters.keywords_not_in_video_description);
-                            if (commaToArray(youtubeFilters.links_from_description))
-                                apiFilters.links_from_description = commaToArray(youtubeFilters.links_from_description);
-                            if (commaToArray(youtubeFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(youtubeFilters.hashtags);
-                            if (commaToArray(youtubeFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(youtubeFilters.not_hashtags);
-                            if (commaToArray(youtubeFilters.links_from_video_description))
-                                apiFilters.links_from_video_description = commaToArray(youtubeFilters.links_from_video_description);
-                            if (youtubeFilters.posting_frequency)
-                                apiFilters.posting_frequency = youtubeFilters.posting_frequency;
-                            if (youtubeFilters.subscriber_growth_percentage || youtubeFilters.subscriber_growth_time_range_months)
-                                apiFilters.subscriber_growth = { growth_percentage: youtubeFilters.subscriber_growth_percentage || null, time_range_months: youtubeFilters.subscriber_growth_time_range_months || 3 };
-                            if (youtubeFilters.has_shorts !== undefined)
-                                apiFilters.has_shorts = youtubeFilters.has_shorts;
-                            if (youtubeFilters.min_shorts_percentage || youtubeFilters.max_shorts_percentage)
-                                apiFilters.shorts_percentage = { min: youtubeFilters.min_shorts_percentage || null, max: youtubeFilters.max_shorts_percentage || null };
-                            if (youtubeFilters.engagement_percent_min || youtubeFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: youtubeFilters.engagement_percent_min || null, max: youtubeFilters.engagement_percent_max || null };
-                            if (youtubeFilters.has_community_posts !== undefined)
-                                apiFilters.has_community_posts = youtubeFilters.has_community_posts;
-                            if (youtubeFilters.streams_live !== undefined)
-                                apiFilters.streams_live = youtubeFilters.streams_live;
-                            if (youtubeFilters.has_merch !== undefined)
-                                apiFilters.has_merch = youtubeFilters.has_merch;
-                            if (youtubeFilters.has_podcast !== undefined)
-                                apiFilters.has_podcast = youtubeFilters.has_podcast;
-                            if (youtubeFilters.has_courses !== undefined)
-                                apiFilters.has_courses = youtubeFilters.has_courses;
-                            if (youtubeFilters.has_membership !== undefined)
-                                apiFilters.has_membership = youtubeFilters.has_membership;
-                            if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos)
-                                apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
-                            if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null)
-                                apiFilters.long_video_duration = { min: (_u = youtubeFilters.long_video_duration_min) !== null && _u !== void 0 ? _u : null, max: (_v = youtubeFilters.long_video_duration_max) !== null && _v !== void 0 ? _v : null };
-                            if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts)
-                                apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
-                            if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos)
-                                apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
-                            if (youtubeFilters.is_monetizing !== undefined)
-                                apiFilters.is_monetizing = youtubeFilters.is_monetizing;
-                            if (commaToArray(youtubeFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(youtubeFilters.similar_to);
-                            if (youtubeFilters.income_min || youtubeFilters.income_max)
-                                apiFilters.income = { min: youtubeFilters.income_min || null, max: youtubeFilters.income_max || null };
-                            if (youtubeFilters.last_upload_long_video)
-                                apiFilters.last_upload_long_video = youtubeFilters.last_upload_long_video;
-                            if (youtubeFilters.last_upload_short_video)
-                                apiFilters.last_upload_short_video = youtubeFilters.last_upload_short_video;
-                            if (youtubeFilters.last_stream_upload)
-                                apiFilters.last_stream_upload = youtubeFilters.last_stream_upload;
-                            if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max)
-                                apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
-                            if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null)
-                                apiFilters.average_stream_duration = { min: (_w = youtubeFilters.average_stream_duration_min) !== null && _w !== void 0 ? _w : null, max: (_x = youtubeFilters.average_stream_duration_max) !== null && _x !== void 0 ? _x : null };
-                            if (youtubeFilters.is_verified !== undefined)
-                                apiFilters.is_verified = youtubeFilters.is_verified;
-                        }
-                        if (platform === "tiktok") {
-                            if (tiktokFilters.number_of_followers_min || tiktokFilters.number_of_followers_max)
-                                apiFilters.number_of_followers = { min: tiktokFilters.number_of_followers_min || null, max: tiktokFilters.number_of_followers_max || null };
-                            if (tiktokFilters.posting_frequency)
-                                apiFilters.posting_frequency = tiktokFilters.posting_frequency;
-                            if (tiktokFilters.follower_growth_percentage || tiktokFilters.follower_growth_time_range_months)
-                                apiFilters.follower_growth = { growth_percentage: tiktokFilters.follower_growth_percentage || null, time_range_months: tiktokFilters.follower_growth_time_range_months || 3 };
-                            if (tiktokFilters.average_likes_min || tiktokFilters.average_likes_max)
-                                apiFilters.average_likes = { min: tiktokFilters.average_likes_min || null, max: tiktokFilters.average_likes_max || null };
-                            if (tiktokFilters.average_comments_min || tiktokFilters.average_comments_max)
-                                apiFilters.average_comments = { min: tiktokFilters.average_comments_min || null, max: tiktokFilters.average_comments_max || null };
-                            if (tiktokFilters.engagement_percent_min || tiktokFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: tiktokFilters.engagement_percent_min || null, max: tiktokFilters.engagement_percent_max || null };
-                            if (tiktokFilters.average_views_min || tiktokFilters.average_views_max)
-                                apiFilters.average_views = { min: tiktokFilters.average_views_min || null, max: tiktokFilters.average_views_max || null };
-                            if (tiktokFilters.average_video_downloads_min || tiktokFilters.average_video_downloads_max)
-                                apiFilters.average_video_downloads = { min: tiktokFilters.average_video_downloads_min || null, max: tiktokFilters.average_video_downloads_max || null };
-                            if (tiktokFilters.video_count_min || tiktokFilters.video_count_max)
-                                apiFilters.video_count = { min: tiktokFilters.video_count_min || null, max: tiktokFilters.video_count_max || null };
-                            if (tiktokFilters.has_tik_tok_shop !== undefined)
-                                apiFilters.has_tik_tok_shop = tiktokFilters.has_tik_tok_shop;
-                            if (tiktokFilters.exclude_private_profile !== undefined)
-                                apiFilters.exclude_private_profile = tiktokFilters.exclude_private_profile;
-                            if (tiktokFilters.is_verified !== undefined)
-                                apiFilters.is_verified = tiktokFilters.is_verified;
-                            if (commaToArray(tiktokFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(tiktokFilters.similar_to);
-                            if (tiktokFilters.last_post)
-                                apiFilters.last_post = tiktokFilters.last_post;
-                            if (commaToArray(tiktokFilters.keywords_in_bio))
-                                apiFilters.keywords_in_bio = commaToArray(tiktokFilters.keywords_in_bio);
-                            if (commaToArray(tiktokFilters.exclude_keywords_in_bio))
-                                apiFilters.exclude_keywords_in_bio = commaToArray(tiktokFilters.exclude_keywords_in_bio);
-                            if (commaToArray(tiktokFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(tiktokFilters.link_in_bio);
-                            if (commaToArray(tiktokFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(tiktokFilters.hashtags);
-                            if (commaToArray(tiktokFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(tiktokFilters.not_hashtags);
-                            if (commaToArray(tiktokFilters.video_description))
-                                apiFilters.video_description = commaToArray(tiktokFilters.video_description);
-                            if (commaToArray(tiktokFilters.not_video_description))
-                                apiFilters.not_video_description = commaToArray(tiktokFilters.not_video_description);
-                        }
-                        if (platform === "twitter") {
-                            if (twitterFilters.number_of_followers_min || twitterFilters.number_of_followers_max)
-                                apiFilters.number_of_followers = { min: twitterFilters.number_of_followers_min || null, max: twitterFilters.number_of_followers_max || null };
-                            if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max)
-                                apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
-                            if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null)
-                                apiFilters.tweets_count = { min: (_y = twitterFilters.min_number_of_tweets) !== null && _y !== void 0 ? _y : null, max: (_z = twitterFilters.max_number_of_tweets) !== null && _z !== void 0 ? _z : null };
-                            if (twitterFilters.average_likes_min || twitterFilters.average_likes_max)
-                                apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
-                            if (twitterFilters.last_post)
-                                apiFilters.last_post = twitterFilters.last_post;
-                            if (commaToArray(twitterFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(twitterFilters.similar_to);
-                            if (commaToArray(twitterFilters.keywords_in_bio))
-                                apiFilters.keywords_in_bio = commaToArray(twitterFilters.keywords_in_bio);
-                            if (commaToArray(twitterFilters.exclude_keywords_in_bio))
-                                apiFilters.exclude_keywords_in_bio = commaToArray(twitterFilters.exclude_keywords_in_bio);
-                            if (commaToArray(twitterFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(twitterFilters.link_in_bio);
-                            if (commaToArray(twitterFilters.hashtags))
-                                apiFilters.hashtags = commaToArray(twitterFilters.hashtags);
-                            if (commaToArray(twitterFilters.not_hashtags))
-                                apiFilters.not_hashtags = commaToArray(twitterFilters.not_hashtags);
-                            if (commaToArray(twitterFilters.keywords_in_tweets))
-                                apiFilters.keywords_in_tweets = commaToArray(twitterFilters.keywords_in_tweets);
-                            if (commaToArray(twitterFilters.tweets))
-                                apiFilters.tweets = commaToArray(twitterFilters.tweets);
-                        }
-                        if (platform === "onlyfans") {
-                            if (onlyfansFilters.subscription_price_min || onlyfansFilters.subscription_price_max)
-                                apiFilters.subscription_price = { min: onlyfansFilters.subscription_price_min || null, max: onlyfansFilters.subscription_price_max || null };
-                            if (onlyfansFilters.number_of_photos_min || onlyfansFilters.number_of_photos_max)
-                                apiFilters.number_of_photos = { min: onlyfansFilters.number_of_photos_min || null, max: onlyfansFilters.number_of_photos_max || null };
-                            if (onlyfansFilters.number_of_likes_min || onlyfansFilters.number_of_likes_max)
-                                apiFilters.number_of_likes = { min: onlyfansFilters.number_of_likes_min || null, max: onlyfansFilters.number_of_likes_max || null };
-                            if (onlyfansFilters.last_active)
-                                apiFilters.last_active = onlyfansFilters.last_active;
-                            if (commaToArray(onlyfansFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(onlyfansFilters.similar_to);
-                            if (onlyfansFilters.has_videos !== undefined)
-                                apiFilters.has_videos = onlyfansFilters.has_videos;
-                            if (onlyfansFilters.has_free_account !== undefined)
-                                apiFilters.has_free_account = onlyfansFilters.has_free_account;
-                            if (onlyfansFilters.has_live_streams !== undefined)
-                                apiFilters.has_live_streams = onlyfansFilters.has_live_streams;
-                            if (onlyfansFilters.is_verified !== undefined)
-                                apiFilters.is_verified = onlyfansFilters.is_verified;
-                        }
-                        if (platform === "twitch") {
-                            if (twitchFilters.followers_min || twitchFilters.followers_max)
-                                apiFilters.followers = { min: twitchFilters.followers_min || null, max: twitchFilters.followers_max || null };
-                            if (twitchFilters.min_streamed_hours_last_30_days || twitchFilters.max_streamed_hours_last_30_days)
-                                apiFilters.streamed_hours_last_30_days = { min: twitchFilters.min_streamed_hours_last_30_days || null, max: twitchFilters.max_streamed_hours_last_30_days || null };
-                            if (twitchFilters.min_maximum_views_count || twitchFilters.max_maximum_views_count)
-                                apiFilters.maximum_views_count = { min: twitchFilters.min_maximum_views_count || null, max: twitchFilters.max_maximum_views_count || null };
-                            if (twitchFilters.min_avg_views_last_30_days || twitchFilters.max_avg_views_last_30_days)
-                                apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
-                            if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days)
-                                apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
-                            if (commaToArray(twitchFilters.games_played))
-                                apiFilters.games_played = commaToArray(twitchFilters.games_played);
-                            if (twitchFilters.is_twitch_partner !== undefined)
-                                apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
-                            if (twitchFilters.keywords_in_description !== undefined)
-                                apiFilters.keywords_in_description = twitchFilters.keywords_in_description;
-                            if (commaToArray(twitchFilters.similar_to))
-                                apiFilters.similar_to = commaToArray(twitchFilters.similar_to);
-                            if (twitchFilters.most_recent_stream_date)
-                                apiFilters.most_recent_stream_date = twitchFilters.most_recent_stream_date;
-                            if (commaToArray(twitchFilters.link_in_bio))
-                                apiFilters.link_in_bio = commaToArray(twitchFilters.link_in_bio);
-                        }
-                        const lookalikesLimit = (_1 = (_0 = additionalOptions.lookalikes_limit) !== null && _0 !== void 0 ? _0 : nodeParams.lookalikes_limit) !== null && _1 !== void 0 ? _1 : 5;
-                        const lookalikesPage = (_3 = (_2 = additionalOptions.lookalikes_page) !== null && _2 !== void 0 ? _2 : nodeParams.lookalikes_page) !== null && _3 !== void 0 ? _3 : 0;
+                        const platform = this.getNodeParameter("platform", itemIndex, "instagram");
+                        const ai_search = (_m = additionalOptions.ai_search) !== null && _m !== void 0 ? _m : "";
+                        const apiFilters = InfluencersClub.buildApiFilters(this, platform, itemIndex);
+                        const lookalikesLimit = (_p = (_o = additionalOptions.lookalikes_limit) !== null && _o !== void 0 ? _o : nodeParams.lookalikes_limit) !== null && _p !== void 0 ? _p : 5;
+                        const lookalikesPage = (_r = (_q = additionalOptions.lookalikes_page) !== null && _q !== void 0 ? _q : nodeParams.lookalikes_page) !== null && _r !== void 0 ? _r : 0;
                         const body = {
                             filter_value,
                             filter_key,
