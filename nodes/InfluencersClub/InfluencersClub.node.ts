@@ -364,7 +364,7 @@ export class InfluencersClub implements INodeType {
 				displayOptions: {
 					show: {
 						resource: ["creator", "discovery"],
-						operation: ["enrichByEmail", "enrichByHandle", "enrichByHandleRaw", "discovery", "findLookalikes"],
+						operation: ["enrichByHandle", "enrichByHandleRaw", "discovery", "findLookalikes"],
 					},
 				},
 				options: [
@@ -440,51 +440,6 @@ export class InfluencersClub implements INodeType {
 									show: {
 										resource: ["creator"],
 										operation: ["findLookalikes"],
-									},
-								},
-							},
-							// Discovery – optional
-							{
-								displayName: "Limit",
-								name: "discovery_limit",
-								type: "number",
-								default: 5,
-								description: "Number of creators to return per page (paging object; API default 5)",
-								displayOptions: {
-									show: {
-										resource: ["discovery"],
-										operation: ["discovery"],
-									},
-								},
-							},
-							{
-								displayName: "Page",
-								name: "discovery_page",
-								type: "number",
-								default: 0,
-								description: "Page index for pagination (paging object; API default 0)",
-								displayOptions: {
-									show: {
-										resource: ["discovery"],
-										operation: ["discovery"],
-									},
-								},
-							},
-							{
-								displayName: "Sort By",
-								name: "discovery_sort_by",
-								type: "options",
-								options: [
-									{ name: "Relevancy", value: "relevancy" },
-									{ name: "Engagement Rate", value: "engagement_rate" },
-									{ name: "Number of Followers", value: "number_of_followers" },
-								],
-								default: "relevancy",
-								description: "Sort creators by relevant data points (sort object)",
-								displayOptions: {
-									show: {
-										resource: ["discovery"],
-										operation: ["discovery"],
 									},
 								},
 							},
@@ -685,48 +640,29 @@ export class InfluencersClub implements INodeType {
 									},
 								],
 							},
-							// CREATOR section: Link in bio, Keywords in bio, Estimated Income, Exclude Private, Verified, Follower Growth, Posting Frequency, Number of posts
-							{
-								displayName: "Is Verified",
-								name: "is_verified",
-								type: "boolean",
-								default: false,
-							},
-							{
-								displayName: "Exclude Private Profile",
-								name: "exclude_private_profile",
-								type: "boolean",
-								default: false,
-							},
-							{
-								displayName: "Posting Frequency",
-								name: "posting_frequency",
-								type: "number",
-								default: 0,
-								description: "Average posts per week",
-							},
-							{
-								displayName: "Follower Growth Percentage",
-								name: "follower_growth_percentage",
-								type: "number",
-								default: 0,
-							},
-							{
-								displayName: "Follower Growth Time Range (Months)",
-								name: "follower_growth_time_range_months",
-								type: "number",
-								default: 3,
-							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "Instagram Filters",
+				name: "instagramFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add Instagram Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["instagram"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "instagramFilters",
+						name: "values",
 						displayName: "Instagram Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["instagram"],
-							},
-						},
 						values: [
 							// Top row: Followers, Last Post, Engagement Rate
 							{
@@ -947,14 +883,27 @@ export class InfluencersClub implements INodeType {
 							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "YouTube Filters",
+				name: "youtubeFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add YouTube Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["youtube"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "youtubeFilters",
+						name: "values",
 						displayName: "YouTube Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["youtube"],
-							},
-						},
 						values: [
 							// Top: Subscribers
 							{
@@ -1265,14 +1214,27 @@ export class InfluencersClub implements INodeType {
 							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "TikTok Filters",
+				name: "tiktokFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add TikTok Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["tiktok"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "tiktokFilters",
+						name: "values",
 						displayName: "TikTok Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["tiktok"],
-							},
-						},
 						values: [
 							// CREATOR: Link in bio contains, Keywords in bio, Exclude Private Profiles, Verified Profile
 							{
@@ -1465,14 +1427,27 @@ export class InfluencersClub implements INodeType {
 							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "Twitter Filters",
+				name: "twitterFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add Twitter Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["twitter"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "twitterFilters",
+						name: "values",
 						displayName: "Twitter Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["twitter"],
-							},
-						},
 						values: [
 							// CONTENT Row 1: Engagement Rate, Keywords in bio, Link in bio contains, Keywords in Tweets
 							{
@@ -1582,14 +1557,27 @@ export class InfluencersClub implements INodeType {
 							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "OnlyFans Filters",
+				name: "onlyfansFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add OnlyFans Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["onlyfans"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "onlyfansFilters",
+						name: "values",
 						displayName: "OnlyFans Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["onlyfans"],
-							},
-						},
 						values: [
 							// CREATOR: Is verified, Has Free Account, Has Live Streams
 							{
@@ -1671,14 +1659,27 @@ export class InfluencersClub implements INodeType {
 							},
 						],
 					},
+				],
+			},
+			{
+				displayName: "Twitch Filters",
+				name: "twitchFilters",
+				type: "fixedCollection",
+				typeOptions: {
+					multipleValues: true,
+				},
+				placeholder: "Add Twitch Filters",
+				default: {},
+				displayOptions: {
+					show: {
+						platform: ["twitch"],
+						operation: ["discovery", "findLookalikes"],
+					},
+				},
+				options: [
 					{
-						name: "twitchFilters",
+						name: "values",
 						displayName: "Twitch Filters",
-						displayOptions: {
-							show: {
-								"/platform": ["twitch"],
-							},
-						},
 						values: [
 							// CREATOR: Is a Twitch Partner
 							{
@@ -1803,12 +1804,12 @@ export class InfluencersClub implements INodeType {
 		const commaToArray = (v: unknown) => typeof v === "string" ? String(v).split(",").map((k: string) => k.trim()).filter(Boolean) : undefined;
 
 		const sharedFilters = getParam("advancedFilters.filters");
-		const instagramFilters = getParam("advancedFilters.instagramFilters");
-		const youtubeFilters = getParam("advancedFilters.youtubeFilters");
-		const tiktokFilters = getParam("advancedFilters.tiktokFilters");
-		const twitterFilters = getParam("advancedFilters.twitterFilters");
-		const onlyfansFilters = getParam("advancedFilters.onlyfansFilters");
-		const twitchFilters = getParam("advancedFilters.twitchFilters");
+		const instagramFilters = getParam("instagramFilters.values");
+		const youtubeFilters = getParam("youtubeFilters.values");
+		const tiktokFilters = getParam("tiktokFilters.values");
+		const twitterFilters = getParam("twitterFilters.values");
+		const onlyfansFilters = getParam("onlyfansFilters.values");
+		const twitchFilters = getParam("twitchFilters.values");
 
 		const apiFilters: IDataObject = {};
 
@@ -1968,7 +1969,6 @@ export class InfluencersClub implements INodeType {
 		return apiFilters;
 	}
 
-	// eslint-disable-next-line no-unused-vars
 	async execute(this: IExecuteFunctions) {
 		const items = this.getInputData();
 		const outputItems: INodeExecutionData[] = [];
@@ -2063,13 +2063,10 @@ export class InfluencersClub implements INodeType {
 				const platform = this.getNodeParameter("platform", itemIndex, "instagram") as string;
 				const apiFilters = InfluencersClub.buildApiFilters(this, platform, itemIndex);
 
-				// Paging & sort: top-level first, then Additional Options, then legacy
-				const discoveryLimit = (this.getNodeParameter("discovery_limit", itemIndex, undefined) as number | undefined)
-					?? (additionalOptions.discovery_limit as number) ?? (nodeParams.discovery_limit as number) ?? 5;
-				const discoveryPage = (this.getNodeParameter("discovery_page", itemIndex, undefined) as number | undefined)
-					?? (additionalOptions.discovery_page as number) ?? (nodeParams.discovery_page as number) ?? 0;
-				const sortBy = (this.getNodeParameter("discovery_sort_by", itemIndex, "") as string)
-					|| (additionalOptions.discovery_sort_by as string) || (nodeParams.discovery_sort_by as string) || "relevancy";
+				// Paging & sort
+				const discoveryLimit = this.getNodeParameter("discovery_limit", itemIndex, 5) as number;
+				const discoveryPage = this.getNodeParameter("discovery_page", itemIndex, 0) as number;
+				const sortBy = this.getNodeParameter("discovery_sort_by", itemIndex, "relevancy") as string;
 				const body: IDataObject = {
 					platform,
 					paging: { limit: discoveryLimit, page: discoveryPage },

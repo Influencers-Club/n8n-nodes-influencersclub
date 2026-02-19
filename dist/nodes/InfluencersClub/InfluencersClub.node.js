@@ -356,7 +356,7 @@ class InfluencersClub {
                     displayOptions: {
                         show: {
                             resource: ["creator", "discovery"],
-                            operation: ["enrichByEmail", "enrichByHandle", "enrichByHandleRaw", "discovery", "findLookalikes"],
+                            operation: ["enrichByHandle", "enrichByHandleRaw", "discovery", "findLookalikes"],
                         },
                     },
                     options: [
@@ -432,51 +432,6 @@ class InfluencersClub {
                                         show: {
                                             resource: ["creator"],
                                             operation: ["findLookalikes"],
-                                        },
-                                    },
-                                },
-                                // Discovery – optional
-                                {
-                                    displayName: "Limit",
-                                    name: "discovery_limit",
-                                    type: "number",
-                                    default: 5,
-                                    description: "Number of creators to return per page (paging object; API default 5)",
-                                    displayOptions: {
-                                        show: {
-                                            resource: ["discovery"],
-                                            operation: ["discovery"],
-                                        },
-                                    },
-                                },
-                                {
-                                    displayName: "Page",
-                                    name: "discovery_page",
-                                    type: "number",
-                                    default: 0,
-                                    description: "Page index for pagination (paging object; API default 0)",
-                                    displayOptions: {
-                                        show: {
-                                            resource: ["discovery"],
-                                            operation: ["discovery"],
-                                        },
-                                    },
-                                },
-                                {
-                                    displayName: "Sort By",
-                                    name: "discovery_sort_by",
-                                    type: "options",
-                                    options: [
-                                        { name: "Relevancy", value: "relevancy" },
-                                        { name: "Engagement Rate", value: "engagement_rate" },
-                                        { name: "Number of Followers", value: "number_of_followers" },
-                                    ],
-                                    default: "relevancy",
-                                    description: "Sort creators by relevant data points (sort object)",
-                                    displayOptions: {
-                                        show: {
-                                            resource: ["discovery"],
-                                            operation: ["discovery"],
                                         },
                                     },
                                 },
@@ -677,48 +632,29 @@ class InfluencersClub {
                                         },
                                     ],
                                 },
-                                // CREATOR section: Link in bio, Keywords in bio, Estimated Income, Exclude Private, Verified, Follower Growth, Posting Frequency, Number of posts
-                                {
-                                    displayName: "Is Verified",
-                                    name: "is_verified",
-                                    type: "boolean",
-                                    default: false,
-                                },
-                                {
-                                    displayName: "Exclude Private Profile",
-                                    name: "exclude_private_profile",
-                                    type: "boolean",
-                                    default: false,
-                                },
-                                {
-                                    displayName: "Posting Frequency",
-                                    name: "posting_frequency",
-                                    type: "number",
-                                    default: 0,
-                                    description: "Average posts per week",
-                                },
-                                {
-                                    displayName: "Follower Growth Percentage",
-                                    name: "follower_growth_percentage",
-                                    type: "number",
-                                    default: 0,
-                                },
-                                {
-                                    displayName: "Follower Growth Time Range (Months)",
-                                    name: "follower_growth_time_range_months",
-                                    type: "number",
-                                    default: 3,
-                                },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "Instagram Filters",
+                    name: "instagramFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add Instagram Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["instagram"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "instagramFilters",
+                            name: "values",
                             displayName: "Instagram Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["instagram"],
-                                },
-                            },
                             values: [
                                 // Top row: Followers, Last Post, Engagement Rate
                                 {
@@ -939,14 +875,27 @@ class InfluencersClub {
                                 },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "YouTube Filters",
+                    name: "youtubeFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add YouTube Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["youtube"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "youtubeFilters",
+                            name: "values",
                             displayName: "YouTube Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["youtube"],
-                                },
-                            },
                             values: [
                                 // Top: Subscribers
                                 {
@@ -1257,14 +1206,27 @@ class InfluencersClub {
                                 },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "TikTok Filters",
+                    name: "tiktokFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add TikTok Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["tiktok"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "tiktokFilters",
+                            name: "values",
                             displayName: "TikTok Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["tiktok"],
-                                },
-                            },
                             values: [
                                 // CREATOR: Link in bio contains, Keywords in bio, Exclude Private Profiles, Verified Profile
                                 {
@@ -1457,14 +1419,27 @@ class InfluencersClub {
                                 },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "Twitter Filters",
+                    name: "twitterFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add Twitter Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["twitter"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "twitterFilters",
+                            name: "values",
                             displayName: "Twitter Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["twitter"],
-                                },
-                            },
                             values: [
                                 // CONTENT Row 1: Engagement Rate, Keywords in bio, Link in bio contains, Keywords in Tweets
                                 {
@@ -1574,14 +1549,27 @@ class InfluencersClub {
                                 },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "OnlyFans Filters",
+                    name: "onlyfansFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add OnlyFans Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["onlyfans"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "onlyfansFilters",
+                            name: "values",
                             displayName: "OnlyFans Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["onlyfans"],
-                                },
-                            },
                             values: [
                                 // CREATOR: Is verified, Has Free Account, Has Live Streams
                                 {
@@ -1663,14 +1651,27 @@ class InfluencersClub {
                                 },
                             ],
                         },
+                    ],
+                },
+                {
+                    displayName: "Twitch Filters",
+                    name: "twitchFilters",
+                    type: "fixedCollection",
+                    typeOptions: {
+                        multipleValues: true,
+                    },
+                    placeholder: "Add Twitch Filters",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            platform: ["twitch"],
+                            operation: ["discovery", "findLookalikes"],
+                        },
+                    },
+                    options: [
                         {
-                            name: "twitchFilters",
+                            name: "values",
                             displayName: "Twitch Filters",
-                            displayOptions: {
-                                show: {
-                                    "/platform": ["twitch"],
-                                },
-                            },
                             values: [
                                 // CREATOR: Is a Twitch Partner
                                 {
@@ -1794,12 +1795,12 @@ class InfluencersClub {
         };
         const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
         const sharedFilters = getParam("advancedFilters.filters");
-        const instagramFilters = getParam("advancedFilters.instagramFilters");
-        const youtubeFilters = getParam("advancedFilters.youtubeFilters");
-        const tiktokFilters = getParam("advancedFilters.tiktokFilters");
-        const twitterFilters = getParam("advancedFilters.twitterFilters");
-        const onlyfansFilters = getParam("advancedFilters.onlyfansFilters");
-        const twitchFilters = getParam("advancedFilters.twitchFilters");
+        const instagramFilters = getParam("instagramFilters.values");
+        const youtubeFilters = getParam("youtubeFilters.values");
+        const tiktokFilters = getParam("tiktokFilters.values");
+        const twitterFilters = getParam("twitterFilters.values");
+        const onlyfansFilters = getParam("onlyfansFilters.values");
+        const twitchFilters = getParam("twitchFilters.values");
         const apiFilters = {};
         // Shared filters
         if (sharedFilters.location && sharedFilters.location !== "")
@@ -2072,9 +2073,8 @@ class InfluencersClub {
         }
         return apiFilters;
     }
-    // eslint-disable-next-line no-unused-vars
     async execute() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         const items = this.getInputData();
         const outputItems = [];
         const nodeParams = this.getNode().parameters;
@@ -2144,11 +2144,10 @@ class InfluencersClub {
                         // Platform: top-level (Discovery) first, then Additional Options, then legacy
                         const platform = this.getNodeParameter("platform", itemIndex, "instagram");
                         const apiFilters = InfluencersClub.buildApiFilters(this, platform, itemIndex);
-                        // Paging & sort: top-level first, then Additional Options, then legacy
-                        const discoveryLimit = (_h = (_g = (_f = this.getNodeParameter("discovery_limit", itemIndex, undefined)) !== null && _f !== void 0 ? _f : additionalOptions.discovery_limit) !== null && _g !== void 0 ? _g : nodeParams.discovery_limit) !== null && _h !== void 0 ? _h : 5;
-                        const discoveryPage = (_l = (_k = (_j = this.getNodeParameter("discovery_page", itemIndex, undefined)) !== null && _j !== void 0 ? _j : additionalOptions.discovery_page) !== null && _k !== void 0 ? _k : nodeParams.discovery_page) !== null && _l !== void 0 ? _l : 0;
-                        const sortBy = this.getNodeParameter("discovery_sort_by", itemIndex, "")
-                            || additionalOptions.discovery_sort_by || nodeParams.discovery_sort_by || "relevancy";
+                        // Paging & sort
+                        const discoveryLimit = this.getNodeParameter("discovery_limit", itemIndex, 5);
+                        const discoveryPage = this.getNodeParameter("discovery_page", itemIndex, 0);
+                        const sortBy = this.getNodeParameter("discovery_sort_by", itemIndex, "relevancy");
                         const body = {
                             platform,
                             paging: { limit: discoveryLimit, page: discoveryPage },
@@ -2177,10 +2176,10 @@ class InfluencersClub {
                         const filter_key = this.getNodeParameter("filter_key", itemIndex);
                         // Platform: top-level first, then Additional Options, then legacy
                         const platform = this.getNodeParameter("platform", itemIndex, "instagram");
-                        const ai_search = (_m = additionalOptions.ai_search) !== null && _m !== void 0 ? _m : "";
+                        const ai_search = (_f = additionalOptions.ai_search) !== null && _f !== void 0 ? _f : "";
                         const apiFilters = InfluencersClub.buildApiFilters(this, platform, itemIndex);
-                        const lookalikesLimit = (_p = (_o = additionalOptions.lookalikes_limit) !== null && _o !== void 0 ? _o : nodeParams.lookalikes_limit) !== null && _p !== void 0 ? _p : 5;
-                        const lookalikesPage = (_r = (_q = additionalOptions.lookalikes_page) !== null && _q !== void 0 ? _q : nodeParams.lookalikes_page) !== null && _r !== void 0 ? _r : 0;
+                        const lookalikesLimit = (_h = (_g = additionalOptions.lookalikes_limit) !== null && _g !== void 0 ? _g : nodeParams.lookalikes_limit) !== null && _h !== void 0 ? _h : 5;
+                        const lookalikesPage = (_k = (_j = additionalOptions.lookalikes_page) !== null && _j !== void 0 ? _j : nodeParams.lookalikes_page) !== null && _k !== void 0 ? _k : 0;
                         const body = {
                             filter_value,
                             filter_key,
