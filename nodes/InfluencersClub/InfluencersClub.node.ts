@@ -465,7 +465,7 @@ export class InfluencersClub implements INodeType {
 				name: "advancedFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add Filters",
 				default: {},
@@ -649,7 +649,7 @@ export class InfluencersClub implements INodeType {
 				name: "instagramFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add Instagram Filters",
 				default: {},
@@ -890,7 +890,7 @@ export class InfluencersClub implements INodeType {
 				name: "youtubeFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add YouTube Filters",
 				default: {},
@@ -1221,7 +1221,7 @@ export class InfluencersClub implements INodeType {
 				name: "tiktokFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add TikTok Filters",
 				default: {},
@@ -1434,7 +1434,7 @@ export class InfluencersClub implements INodeType {
 				name: "twitterFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add Twitter Filters",
 				default: {},
@@ -1564,7 +1564,7 @@ export class InfluencersClub implements INodeType {
 				name: "onlyfansFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add OnlyFans Filters",
 				default: {},
@@ -1666,7 +1666,7 @@ export class InfluencersClub implements INodeType {
 				name: "twitchFilters",
 				type: "fixedCollection",
 				typeOptions: {
-					multipleValues: true,
+					multipleValues: false,
 				},
 				placeholder: "Add Twitch Filters",
 				default: {},
@@ -1759,13 +1759,6 @@ export class InfluencersClub implements INodeType {
 								type: "string",
 								default: "",
 								description: "Comma-separated game names",
-							},
-							{
-								displayName: "Tagged Profiles",
-								name: "similar_to",
-								type: "string",
-								default: "",
-								description: "Comma-separated usernames or handles",
 							},
 							// Additional (execute supports these)
 							{
@@ -1960,8 +1953,7 @@ export class InfluencersClub implements INodeType {
 			if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days) apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
 			if (commaToArray(twitchFilters.games_played)) apiFilters.games_played = commaToArray(twitchFilters.games_played);
 			if (twitchFilters.is_twitch_partner !== undefined) apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
-			if (twitchFilters.keywords_in_description !== undefined) apiFilters.keywords_in_description = twitchFilters.keywords_in_description;
-			if (commaToArray(twitchFilters.similar_to)) apiFilters.similar_to = commaToArray(twitchFilters.similar_to);
+			if (commaToArray(twitchFilters.keywords_in_description)) apiFilters.keywords_in_description = commaToArray(twitchFilters.keywords_in_description);
 			if (twitchFilters.most_recent_stream_date) apiFilters.most_recent_stream_date = twitchFilters.most_recent_stream_date;
 			if (commaToArray(twitchFilters.link_in_bio)) apiFilters.link_in_bio = commaToArray(twitchFilters.link_in_bio);
 		}

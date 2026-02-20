@@ -457,7 +457,7 @@ class InfluencersClub {
                     name: "advancedFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add Filters",
                     default: {},
@@ -641,7 +641,7 @@ class InfluencersClub {
                     name: "instagramFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add Instagram Filters",
                     default: {},
@@ -882,7 +882,7 @@ class InfluencersClub {
                     name: "youtubeFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add YouTube Filters",
                     default: {},
@@ -1213,7 +1213,7 @@ class InfluencersClub {
                     name: "tiktokFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add TikTok Filters",
                     default: {},
@@ -1426,7 +1426,7 @@ class InfluencersClub {
                     name: "twitterFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add Twitter Filters",
                     default: {},
@@ -1556,7 +1556,7 @@ class InfluencersClub {
                     name: "onlyfansFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add OnlyFans Filters",
                     default: {},
@@ -1658,7 +1658,7 @@ class InfluencersClub {
                     name: "twitchFilters",
                     type: "fixedCollection",
                     typeOptions: {
-                        multipleValues: true,
+                        multipleValues: false,
                     },
                     placeholder: "Add Twitch Filters",
                     default: {},
@@ -1751,13 +1751,6 @@ class InfluencersClub {
                                     type: "string",
                                     default: "",
                                     description: "Comma-separated game names",
-                                },
-                                {
-                                    displayName: "Tagged Profiles",
-                                    name: "similar_to",
-                                    type: "string",
-                                    default: "",
-                                    description: "Comma-separated usernames or handles",
                                 },
                                 // Additional (execute supports these)
                                 {
@@ -2062,10 +2055,8 @@ class InfluencersClub {
                 apiFilters.games_played = commaToArray(twitchFilters.games_played);
             if (twitchFilters.is_twitch_partner !== undefined)
                 apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
-            if (twitchFilters.keywords_in_description !== undefined)
-                apiFilters.keywords_in_description = twitchFilters.keywords_in_description;
-            if (commaToArray(twitchFilters.similar_to))
-                apiFilters.similar_to = commaToArray(twitchFilters.similar_to);
+            if (commaToArray(twitchFilters.keywords_in_description))
+                apiFilters.keywords_in_description = commaToArray(twitchFilters.keywords_in_description);
             if (twitchFilters.most_recent_stream_date)
                 apiFilters.most_recent_stream_date = twitchFilters.most_recent_stream_date;
             if (commaToArray(twitchFilters.link_in_bio))
