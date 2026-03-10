@@ -10,6 +10,7 @@ import {
     NodeConnectionTypes,
     JsonObject,
 } from "n8n-workflow";
+import FormData from "form-data";
 
 export class InfluencersClub implements INodeType {
 	description: INodeTypeDescription = {
@@ -149,22 +150,137 @@ export class InfluencersClub implements INodeType {
 			},
 			// Batch Enrichment parameters
 			{
-				displayName: "Emails",
-				name: "batch_emails",
+				displayName: "CSV File (Binary Property)",
+				name: "batch_binary_property",
 				type: "string",
-				typeOptions: {
-					rows: 4,
-				},
-				default: "",
+				default: "data",
 				required: true,
-				placeholder: "email1@example.com\nemail2@example.com",
-				description: "One email per line (or comma-separated) to enrich in this batch",
+				description: "Name of the binary property containing the CSV file with emails or handles. Connect a \"Read Binary File\" node before this node.",
 				displayOptions: {
 					show: {
 						resource: ["batchEnrichment"],
 						operation: ["createBatch"],
 					},
 				},
+			},
+			{
+				displayName: "Enrichment Mode",
+				name: "batch_enrichment_mode",
+				type: "options",
+				options: [
+					{ name: "Raw", value: "raw" },
+					{ name: "Full", value: "full" },
+					{ name: "Basic", value: "basic" },
+					{ name: "Advanced", value: "advanced" },
+				],
+				default: "raw",
+				required: true,
+				description: "The enrichment mode to use for this batch",
+				displayOptions: {
+					show: {
+						resource: ["batchEnrichment"],
+						operation: ["createBatch"],
+					},
+				},
+			},
+			{
+				displayName: "Platform",
+				name: "batch_platform",
+				type: "options",
+				options: [
+					{ name: "None", value: "" },
+					{ name: "Instagram", value: "instagram" },
+					{ name: "YouTube", value: "youtube" },
+					{ name: "TikTok", value: "tiktok" },
+					{ name: "Twitter", value: "twitter" },
+					{ name: "Twitch", value: "twitch" },
+					{ name: "OnlyFans", value: "onlyfans" },
+				],
+				default: "",
+				description: "Target platform for enrichment (optional)",
+				displayOptions: {
+					show: {
+						resource: ["batchEnrichment"],
+						operation: ["createBatch"],
+					},
+				},
+			},
+			{
+				displayName: "Additional Options",
+				name: "batchAdditionalOptions",
+				type: "fixedCollection",
+				placeholder: "Add options",
+				default: {},
+				displayOptions: {
+					show: {
+						resource: ["batchEnrichment"],
+						operation: ["createBatch"],
+					},
+				},
+				options: [
+					{
+						name: "options",
+						displayName: "Options",
+						values: [
+							{
+								displayName: "Metadata",
+								name: "metadata",
+								type: "string",
+								default: "",
+								description: "JSON string with custom metadata for this batch",
+							},
+							{
+								displayName: "Email Required",
+								name: "email_required",
+								type: "options",
+								options: [
+									{ name: "None", value: "" },
+									{ name: "Must Have", value: "must_have" },
+									{ name: "Preferred", value: "preferred" },
+								],
+								default: "",
+								description: "Email requirement preference",
+							},
+							{
+								displayName: "Include Lookalikes",
+								name: "include_lookalikes",
+								type: "boolean",
+								default: false,
+								description: "Whether to include similar creators",
+							},
+							{
+								displayName: "Include Audience Data",
+								name: "include_audience_data",
+								type: "boolean",
+								default: false,
+								description: "Whether to include audience demographics",
+							},
+							{
+								displayName: "Exclude Platforms",
+								name: "exclude_platforms",
+								type: "options",
+								options: [
+									{ name: "None", value: "" },
+									{ name: "Instagram", value: "instagram" },
+									{ name: "YouTube", value: "youtube" },
+									{ name: "TikTok", value: "tiktok" },
+									{ name: "Twitter", value: "twitter" },
+									{ name: "Twitch", value: "twitch" },
+									{ name: "OnlyFans", value: "onlyfans" },
+								],
+								default: "",
+								description: "Platform to exclude from enrichment",
+							},
+							{
+								displayName: "Min Followers",
+								name: "min_followers",
+								type: "number",
+								default: 0,
+								description: "Minimum follower count threshold",
+							},
+						],
+					},
+				],
 			},
 			{
 				displayName: "Batch ID",
@@ -2119,22 +2235,41 @@ export class InfluencersClub implements INodeType {
 				break;
 			}
 			case "createBatch": {
-				const emailsStr = this.getNodeParameter("batch_emails", itemIndex) as string;
-				const emails = emailsStr
-					.split(/[\n,]/)
-					.map((e: string) => e.trim())
-					.filter(Boolean);
-				if (emails.length === 0) {
-					throw new NodeOperationError(this.getNode(), "At least one email is required. Add one or more emails in the Emails field (one per line or comma-separated).", { itemIndex });
-				}
-				const body: IDataObject = { emails };
+				const binaryPropertyName = this.getNodeParameter("batch_binary_property", itemIndex) as string;
+				const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
+				const csvBuffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
+				const fileName = binaryData.fileName || "batch.csv";
+
+				const enrichmentMode = this.getNodeParameter("batch_enrichment_mode", itemIndex) as string;
+				const batchPlatform = this.getNodeParameter("batch_platform", itemIndex, "") as string;
+				const batchOpts = (this.getNodeParameter("batchAdditionalOptions", itemIndex, {}) as IDataObject);
+				const opts = (batchOpts.options || {}) as IDataObject;
+
+				const form = new FormData();
+				form.append("file", csvBuffer, { filename: fileName, contentType: "text/csv" });
+				form.append("enrichment_mode", enrichmentMode);
+				if (batchPlatform) form.append("platform", batchPlatform);
+				if (opts.metadata) form.append("metadata", String(opts.metadata));
+				if (opts.email_required) form.append("email_required", String(opts.email_required));
+				if (opts.include_lookalikes) form.append("include_lookalikes", String(opts.include_lookalikes));
+				if (opts.include_audience_data) form.append("include_audience_data", String(opts.include_audience_data));
+				if (opts.exclude_platforms) form.append("exclude_platforms", String(opts.exclude_platforms));
+				if ((opts.min_followers as number) > 0) form.append("min_followers", String(opts.min_followers));
+
+				const credentials = await this.getCredentials("influencersClubApi");
+				const apiKey = credentials.apiKey as string;
 				const options = {
 					method: "POST" as IHttpRequestMethods,
-					url: "https://api-dashboard.influencers.club/public/v1/creators/enrich/public/",
-					body,
-					json: true,
+					url: "https://api-dashboard.influencers.club/public/v1/enrichment/batch/",
+					body: form,
+					headers: {
+						...form.getHeaders(),
+						Authorization: `Bearer ${apiKey}`,
+						"X-Origin": "n8n",
+						"X-Integration": "influencers-n8n",
+					},
 				};
-				const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+				const resp = await this.helpers.httpRequest(options);
 				outputItems.push({ json: resp as IDataObject, pairedItem: { item: itemIndex } });
 				break;
 			}
@@ -2142,7 +2277,7 @@ export class InfluencersClub implements INodeType {
 				const batchId = this.getNodeParameter("batch_id", itemIndex) as string;
 				const options = {
 					method: "GET" as IHttpRequestMethods,
-					url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/`,
+					url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/status/`,
 					json: true,
 				};
 				const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
@@ -2153,7 +2288,7 @@ export class InfluencersClub implements INodeType {
 				const batchId = this.getNodeParameter("batch_id", itemIndex) as string;
 				const options = {
 					method: "GET" as IHttpRequestMethods,
-					url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/download/`,
+					url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/?format=csv`,
 					json: true,
 				};
 				const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
@@ -2164,7 +2299,7 @@ export class InfluencersClub implements INodeType {
 				const batchId = this.getNodeParameter("batch_id", itemIndex) as string;
 				const options = {
 					method: "POST" as IHttpRequestMethods,
-					url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/resume/`,
+					url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/resume/`,
 					body: {},
 					json: true,
 				};

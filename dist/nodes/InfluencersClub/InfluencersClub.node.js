@@ -1,7 +1,11 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InfluencersClub = void 0;
 const n8n_workflow_1 = require("n8n-workflow");
+const form_data_1 = __importDefault(require("form-data"));
 class InfluencersClub {
     constructor() {
         this.description = {
@@ -141,22 +145,137 @@ class InfluencersClub {
                 },
                 // Batch Enrichment parameters
                 {
-                    displayName: "Emails",
-                    name: "batch_emails",
+                    displayName: "CSV File (Binary Property)",
+                    name: "batch_binary_property",
                     type: "string",
-                    typeOptions: {
-                        rows: 4,
-                    },
-                    default: "",
+                    default: "data",
                     required: true,
-                    placeholder: "email1@example.com\nemail2@example.com",
-                    description: "One email per line (or comma-separated) to enrich in this batch",
+                    description: "Name of the binary property containing the CSV file with emails or handles. Connect a \"Read Binary File\" node before this node.",
                     displayOptions: {
                         show: {
                             resource: ["batchEnrichment"],
                             operation: ["createBatch"],
                         },
                     },
+                },
+                {
+                    displayName: "Enrichment Mode",
+                    name: "batch_enrichment_mode",
+                    type: "options",
+                    options: [
+                        { name: "Raw", value: "raw" },
+                        { name: "Full", value: "full" },
+                        { name: "Basic", value: "basic" },
+                        { name: "Advanced", value: "advanced" },
+                    ],
+                    default: "raw",
+                    required: true,
+                    description: "The enrichment mode to use for this batch",
+                    displayOptions: {
+                        show: {
+                            resource: ["batchEnrichment"],
+                            operation: ["createBatch"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Platform",
+                    name: "batch_platform",
+                    type: "options",
+                    options: [
+                        { name: "None", value: "" },
+                        { name: "Instagram", value: "instagram" },
+                        { name: "YouTube", value: "youtube" },
+                        { name: "TikTok", value: "tiktok" },
+                        { name: "Twitter", value: "twitter" },
+                        { name: "Twitch", value: "twitch" },
+                        { name: "OnlyFans", value: "onlyfans" },
+                    ],
+                    default: "",
+                    description: "Target platform for enrichment (optional)",
+                    displayOptions: {
+                        show: {
+                            resource: ["batchEnrichment"],
+                            operation: ["createBatch"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Additional Options",
+                    name: "batchAdditionalOptions",
+                    type: "fixedCollection",
+                    placeholder: "Add options",
+                    default: {},
+                    displayOptions: {
+                        show: {
+                            resource: ["batchEnrichment"],
+                            operation: ["createBatch"],
+                        },
+                    },
+                    options: [
+                        {
+                            name: "options",
+                            displayName: "Options",
+                            values: [
+                                {
+                                    displayName: "Metadata",
+                                    name: "metadata",
+                                    type: "string",
+                                    default: "",
+                                    description: "JSON string with custom metadata for this batch",
+                                },
+                                {
+                                    displayName: "Email Required",
+                                    name: "email_required",
+                                    type: "options",
+                                    options: [
+                                        { name: "None", value: "" },
+                                        { name: "Must Have", value: "must_have" },
+                                        { name: "Preferred", value: "preferred" },
+                                    ],
+                                    default: "",
+                                    description: "Email requirement preference",
+                                },
+                                {
+                                    displayName: "Include Lookalikes",
+                                    name: "include_lookalikes",
+                                    type: "boolean",
+                                    default: false,
+                                    description: "Whether to include similar creators",
+                                },
+                                {
+                                    displayName: "Include Audience Data",
+                                    name: "include_audience_data",
+                                    type: "boolean",
+                                    default: false,
+                                    description: "Whether to include audience demographics",
+                                },
+                                {
+                                    displayName: "Exclude Platforms",
+                                    name: "exclude_platforms",
+                                    type: "options",
+                                    options: [
+                                        { name: "None", value: "" },
+                                        { name: "Instagram", value: "instagram" },
+                                        { name: "YouTube", value: "youtube" },
+                                        { name: "TikTok", value: "tiktok" },
+                                        { name: "Twitter", value: "twitter" },
+                                        { name: "Twitch", value: "twitch" },
+                                        { name: "OnlyFans", value: "onlyfans" },
+                                    ],
+                                    default: "",
+                                    description: "Platform to exclude from enrichment",
+                                },
+                                {
+                                    displayName: "Min Followers",
+                                    name: "min_followers",
+                                    type: "number",
+                                    default: 0,
+                                    description: "Minimum follower count threshold",
+                                },
+                            ],
+                        },
+                    ],
                 },
                 {
                     displayName: "Batch ID",
@@ -2065,7 +2184,7 @@ class InfluencersClub {
         return apiFilters;
     }
     async execute() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
         const items = this.getInputData();
         const outputItems = [];
         const nodeParams = this.getNode().parameters;
@@ -2193,30 +2312,73 @@ class InfluencersClub {
                         break;
                     }
                     case "createBatch": {
-                        const emailsStr = this.getNodeParameter("batch_emails", itemIndex);
-                        const emails = emailsStr
-                            .split(/[\n,]/)
-                            .map((e) => e.trim())
-                            .filter(Boolean);
-                        if (emails.length === 0) {
-                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), "At least one email is required. Add one or more emails in the Emails field (one per line or comma-separated).", { itemIndex });
-                        }
-                        const body = { emails };
+                        const binaryPropertyName = this.getNodeParameter("batch_binary_property", itemIndex);
+                        const binaryData = this.helpers.assertBinaryData(itemIndex, binaryPropertyName);
+                        const csvBuffer = await this.helpers.getBinaryDataBuffer(itemIndex, binaryPropertyName);
+                        const fileName = binaryData.fileName || "batch.csv";
+                        const enrichmentMode = this.getNodeParameter("batch_enrichment_mode", itemIndex);
+                        const batchPlatform = this.getNodeParameter("batch_platform", itemIndex, "");
+                        const batchOpts = this.getNodeParameter("batchAdditionalOptions", itemIndex, {});
+                        const opts = (batchOpts.options || {});
+                        const form = new form_data_1.default();
+                        form.append("file", csvBuffer, { filename: fileName, contentType: "text/csv" });
+                        form.append("enrichment_mode", enrichmentMode);
+                        if (batchPlatform)
+                            form.append("platform", batchPlatform);
+                        if (opts.metadata)
+                            form.append("metadata", String(opts.metadata));
+                        if (opts.email_required)
+                            form.append("email_required", String(opts.email_required));
+                        if (opts.include_lookalikes)
+                            form.append("include_lookalikes", String(opts.include_lookalikes));
+                        if (opts.include_audience_data)
+                            form.append("include_audience_data", String(opts.include_audience_data));
+                        if (opts.exclude_platforms)
+                            form.append("exclude_platforms", String(opts.exclude_platforms));
+                        if (opts.min_followers > 0)
+                            form.append("min_followers", String(opts.min_followers));
+                        const credentials = await this.getCredentials("influencersClubApi");
+                        const apiKey = credentials.apiKey;
                         const options = {
                             method: "POST",
-                            url: "https://api-dashboard.influencers.club/public/v1/creators/enrich/public/",
-                            body,
-                            json: true,
+                            url: "https://api-dashboard.influencers.club/public/v1/enrichment/batch/",
+                            body: form,
+                            headers: {
+                                ...form.getHeaders(),
+                                Authorization: `Bearer ${apiKey}`,
+                                "X-Origin": "n8n",
+                                "X-Integration": "influencers-n8n",
+                            },
                         };
-                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
-                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        try {
+                            const resp = await this.helpers.httpRequest(options);
+                            outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        }
+                        catch (batchError) {
+                            const axiosErr = batchError;
+                            outputItems.push({
+                                json: {
+                                    _debug_fileName: fileName,
+                                    _debug_fileSize: csvBuffer.length,
+                                    _debug_csvPreview: csvBuffer.toString("utf-8").substring(0, 300),
+                                    _debug_enrichmentMode: enrichmentMode,
+                                    _debug_platform: batchPlatform || "(none)",
+                                    _debug_contentType: form.getHeaders()["content-type"],
+                                    _error_message: (_l = axiosErr.message) !== null && _l !== void 0 ? _l : "unknown",
+                                    _error_status: (_o = (_m = axiosErr.response) === null || _m === void 0 ? void 0 : _m.status) !== null && _o !== void 0 ? _o : "",
+                                    _error_response_body: (_q = (_p = axiosErr.response) === null || _p === void 0 ? void 0 : _p.data) !== null && _q !== void 0 ? _q : "no response body",
+                                    _error_response_headers: (_s = (_r = axiosErr.response) === null || _r === void 0 ? void 0 : _r.headers) !== null && _s !== void 0 ? _s : "",
+                                },
+                                pairedItem: { item: itemIndex },
+                            });
+                        }
                         break;
                     }
                     case "getBatchStatus": {
                         const batchId = this.getNodeParameter("batch_id", itemIndex);
                         const options = {
                             method: "GET",
-                            url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/`,
+                            url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/status/`,
                             json: true,
                         };
                         const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
@@ -2227,7 +2389,7 @@ class InfluencersClub {
                         const batchId = this.getNodeParameter("batch_id", itemIndex);
                         const options = {
                             method: "GET",
-                            url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/download/`,
+                            url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/?format=csv`,
                             json: true,
                         };
                         const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
@@ -2238,7 +2400,7 @@ class InfluencersClub {
                         const batchId = this.getNodeParameter("batch_id", itemIndex);
                         const options = {
                             method: "POST",
-                            url: `https://api-dashboard.influencers.club/public/v1/creators/enrich/public/${encodeURIComponent(batchId)}/resume/`,
+                            url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/resume/`,
                             body: {},
                             json: true,
                         };
