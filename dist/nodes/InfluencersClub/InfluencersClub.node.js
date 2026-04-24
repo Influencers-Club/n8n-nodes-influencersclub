@@ -50,8 +50,31 @@ class InfluencersClub {
                             value: "batchEnrichment",
                             description: "Create, check status, download, or resume batch enrichment jobs",
                         },
+                        {
+                            name: "Account",
+                            value: "account",
+                            description: "Account-level operations such as credit balance",
+                        },
                     ],
                     default: "creator",
+                },
+                {
+                    displayName: "Operation",
+                    name: "operation",
+                    type: "options",
+                    noDataExpression: true,
+                    displayOptions: {
+                        show: { resource: ["account"] },
+                    },
+                    options: [
+                        {
+                            name: "Get Credits",
+                            value: "getCredits",
+                            description: "Retrieve the available credit balance and cumulative usage. This call does not consume credits.",
+                            action: "Get Credits",
+                        },
+                    ],
+                    default: "getCredits",
                 },
                 {
                     displayName: "Operation",
@@ -85,6 +108,30 @@ class InfluencersClub {
                             value: "findLookalikes",
                             description: "This endpoint helps identify creators who are similar to a given influencer based on their social media presence, niche, engagement patterns, and audience characteristics. It allows businesses to discover new potential partners, expand outreach efforts, and optimize influencer marketing campaigns by targeting lookalike creators.",
                             action: "Find Similar Creators",
+                        },
+                        {
+                            name: "Get Connected Socials",
+                            value: "getSocials",
+                            description: "Retrieve verified cross-platform accounts linked to a creator",
+                            action: "Get Connected Socials",
+                        },
+                        {
+                            name: "Get Posts",
+                            value: "getPosts",
+                            description: "Retrieve recent posts with engagement metrics (Instagram, TikTok, YouTube)",
+                            action: "Get Posts",
+                        },
+                        {
+                            name: "Get Post Details",
+                            value: "getPostDetails",
+                            description: "Retrieve detailed post data including comments, transcripts, or audio (Instagram, TikTok, YouTube)",
+                            action: "Get Post Details",
+                        },
+                        {
+                            name: "Audience Overlap",
+                            value: "audienceOverlap",
+                            description: "Compare audience reach and duplication between 2-10 creators",
+                            action: "Audience Overlap",
                         },
                     ],
                     default: "enrichByEmail",
@@ -166,7 +213,6 @@ class InfluencersClub {
                         { name: "Raw", value: "raw" },
                         { name: "Full", value: "full" },
                         { name: "Basic", value: "basic" },
-                        { name: "Advanced", value: "advanced" },
                     ],
                     default: "raw",
                     required: true,
@@ -288,6 +334,37 @@ class InfluencersClub {
                         show: {
                             resource: ["batchEnrichment"],
                             operation: ["getBatchStatus", "downloadBatchResults", "resumeBatch"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Format",
+                    name: "batch_download_format",
+                    type: "options",
+                    options: [
+                        {
+                            name: "JSON",
+                            value: "json",
+                            description: "Return the enriched records as JSON items (most useful for downstream n8n nodes)",
+                        },
+                        {
+                            name: "CSV (Binary)",
+                            value: "csv",
+                            description: "Return the CSV file as binary data (use with Write Binary File, Email attachment, etc.)",
+                        },
+                        {
+                            name: "Presigned URL",
+                            value: "url",
+                            description: "Return a presigned S3 URL — safer for large batches; the user/workflow fetches it separately",
+                        },
+                    ],
+                    default: "json",
+                    required: true,
+                    description: "How the download should be delivered",
+                    displayOptions: {
+                        show: {
+                            resource: ["batchEnrichment"],
+                            operation: ["downloadBatchResults"],
                         },
                     },
                 },
@@ -429,18 +506,18 @@ class InfluencersClub {
                         },
                     },
                 },
-                // Enrich by Handle parameters
+                // Enrich by Handle parameters (also reused by Get Connected Socials and Get Posts)
                 {
                     displayName: "Handle",
                     name: "handle",
                     type: "string",
                     default: "",
                     required: true,
-                    description: "Enter the creator’s handle URL or ID",
+                    description: "Enter the creator’s handle, profile URL, or YouTube channel ID (UC...)",
                     displayOptions: {
                         show: {
                             resource: ["creator"],
-                            operation: ["enrichByHandle", "enrichByHandleRaw"],
+                            operation: ["enrichByHandle", "enrichByHandleRaw", "getSocials", "getPosts"],
                         },
                     },
                 },
@@ -462,9 +539,149 @@ class InfluencersClub {
                     displayOptions: {
                         show: {
                             resource: ["creator"],
-                            operation: ["enrichByHandle", "enrichByHandleRaw"],
+                            operation: ["enrichByHandle", "enrichByHandleRaw", "getSocials"],
                         },
                     },
+                },
+                {
+                    displayName: "Include Audience Data",
+                    name: "include_audience_data",
+                    type: "boolean",
+                    default: false,
+                    description: "Whether to include audience demographic and interest data in the response",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["enrichByHandle"],
+                        },
+                    },
+                },
+                // Platform (video) — Posts, Post Details, Audience Overlap only support IG/TT/YT
+                {
+                    displayName: "Platform",
+                    name: "video_platform",
+                    type: "options",
+                    options: [
+                        { name: "Instagram", value: "instagram" },
+                        { name: "TikTok", value: "tiktok" },
+                        { name: "YouTube", value: "youtube" },
+                    ],
+                    default: "instagram",
+                    required: true,
+                    description: "Social platform (Posts, Post Details and Audience Overlap support Instagram, TikTok and YouTube only)",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPosts", "getPostDetails", "audienceOverlap"],
+                        },
+                    },
+                },
+                // Get Posts — pagination
+                {
+                    displayName: "Return All",
+                    name: "posts_return_all",
+                    type: "boolean",
+                    default: false,
+                    description: "Whether to fetch every available page. When off, only one page is returned.",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPosts"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Count",
+                    name: "posts_count",
+                    type: "number",
+                    default: 30,
+                    description: "Posts per page. Platform caps: Instagram is fixed at 12; TikTok default 30 / max 35; YouTube default 30 / max 50. The API clamps values outside these ranges.",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPosts"],
+                        },
+                    },
+                    typeOptions: { minValue: 1, maxValue: 50 },
+                },
+                // Get Post Details — post id and content type
+                {
+                    displayName: "Post ID",
+                    name: "post_id",
+                    type: "string",
+                    default: "",
+                    required: true,
+                    description: "Unique identifier of the post to retrieve",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPostDetails"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Content Type",
+                    name: "content_type",
+                    type: "options",
+                    options: [
+                        { name: "Data", value: "data", description: "Post metadata and engagement metrics" },
+                        { name: "Comments", value: "comments", description: "Paginated comment list" },
+                        { name: "Transcript", value: "transcript", description: "Extracted spoken text from video content" },
+                        { name: "Audio", value: "audio", description: "Audio resource reference (Instagram and TikTok only — not supported on YouTube)" },
+                    ],
+                    default: "data",
+                    required: true,
+                    description: "Which type of post data to retrieve. Note: \"Audio\" is only supported for Instagram and TikTok.",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPostDetails"],
+                        },
+                    },
+                },
+                {
+                    displayName: "Pagination Token",
+                    name: "details_pagination_token",
+                    type: "string",
+                    default: "",
+                    description: "Token for retrieving the next page of comments (used when Content Type is \"comments\")",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["getPostDetails"],
+                        },
+                    },
+                },
+                // Audience Overlap — 2 to 10 creator handles
+                {
+                    displayName: "Creators",
+                    name: "overlap_creators",
+                    type: "fixedCollection",
+                    placeholder: "Add Creator",
+                    default: {},
+                    typeOptions: { multipleValues: true },
+                    description: "List of creator handles to compare. Between 2 and 10 creators are required.",
+                    displayOptions: {
+                        show: {
+                            resource: ["creator"],
+                            operation: ["audienceOverlap"],
+                        },
+                    },
+                    options: [
+                        {
+                            name: "values",
+                            displayName: "Creator",
+                            values: [
+                                {
+                                    displayName: "Handle",
+                                    name: "handle",
+                                    type: "string",
+                                    default: "",
+                                    description: "Creator username on the selected platform",
+                                },
+                            ],
+                        },
+                    ],
                 },
                 {
                     displayName: "Additional Options",
@@ -594,10 +811,11 @@ class InfluencersClub {
                                 // Top row (general): Location, Followers, Last Post, Engagement Rate, Gender, Language
                                 {
                                     displayName: "Location",
-                                    name: "location",
-                                    type: "string",
-                                    default: "",
-                                    description: "Comma-separated locations (country or city)",
+                                    name: "location_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getLocations" },
+                                    description: "Pick locations from the API's official dictionary for the selected platform",
                                 },
                                 {
                                     displayName: "Gender",
@@ -617,10 +835,11 @@ class InfluencersClub {
                                 },
                                 {
                                     displayName: "Profile Language",
-                                    name: "profile_language",
-                                    type: "string",
-                                    default: "",
-                                    description: "Comma-separated languages (ISO 639-1)",
+                                    name: "profile_language_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getLanguages" },
+                                    description: "Pick one or more profile languages from the API's official dictionary",
                                 },
                                 {
                                     displayName: "Type",
@@ -665,10 +884,269 @@ class InfluencersClub {
                                 },
                                 {
                                     displayName: "Brands",
-                                    name: "brands",
-                                    type: "string",
+                                    name: "brands_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getBrands" },
+                                    description: "Pick brands from the API's official dictionary",
+                                },
+                                {
+                                    displayName: "Audience Interests",
+                                    name: "audience_interests_picker",
+                                    type: "fixedCollection",
+                                    typeOptions: { multipleValues: true },
+                                    placeholder: "Add Interest",
+                                    default: {},
+                                    description: "Filter creators whose Instagram followers share these interests (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                    options: [
+                                        {
+                                            name: "values",
+                                            displayName: "Interest",
+                                            values: [
+                                                {
+                                                    displayName: "Interest",
+                                                    name: "name",
+                                                    type: "options",
+                                                    typeOptions: { loadOptionsMethod: "getAudienceInterests" },
+                                                    default: "",
+                                                    description: "Select an interest from the API dictionary",
+                                                },
+                                                {
+                                                    displayName: "Minimum Percentage",
+                                                    name: "min_pct",
+                                                    type: "number",
+                                                    default: 10,
+                                                    description: "Minimum percentage of the audience that must match this interest",
+                                                    typeOptions: { minValue: 0, maxValue: 100 },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    displayName: "Audience Locations",
+                                    name: "audience_locations_picker",
+                                    type: "fixedCollection",
+                                    typeOptions: { multipleValues: true },
+                                    placeholder: "Add Location",
+                                    default: {},
+                                    description: "Filter creators whose Instagram followers live in these locations (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                    options: [
+                                        {
+                                            name: "values",
+                                            displayName: "Location",
+                                            values: [
+                                                {
+                                                    displayName: "Location",
+                                                    name: "name",
+                                                    type: "options",
+                                                    typeOptions: { loadOptionsMethod: "getAudienceLocations" },
+                                                    default: "",
+                                                    description: "Select a location from the API dictionary",
+                                                },
+                                                {
+                                                    displayName: "Type",
+                                                    name: "type",
+                                                    type: "options",
+                                                    options: [
+                                                        { name: "Country", value: "country" },
+                                                        { name: "State", value: "state" },
+                                                        { name: "City", value: "city" },
+                                                    ],
+                                                    default: "country",
+                                                    description: "Granularity of the location",
+                                                },
+                                                {
+                                                    displayName: "Minimum Percentage",
+                                                    name: "min_pct",
+                                                    type: "number",
+                                                    default: 10,
+                                                    description: "Minimum percentage of the audience that must live in this location",
+                                                    typeOptions: { minValue: 0, maxValue: 100 },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    displayName: "Audience Brands",
+                                    name: "audience_brands_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getAudienceBrandNames" },
+                                    description: "Filter creators whose Instagram followers engage with these brands (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                },
+                                {
+                                    displayName: "Audience Brand Categories",
+                                    name: "audience_brand_categories_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getAudienceBrandCategories" },
+                                    description: "Filter creators whose Instagram followers engage with these brand categories (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                },
+                                {
+                                    displayName: "Audience Gender",
+                                    name: "audience_gender_picker",
+                                    type: "fixedCollection",
+                                    typeOptions: { multipleValues: false },
+                                    placeholder: "Set Gender",
+                                    default: {},
+                                    description: "Filter creators whose Instagram followers match this gender distribution (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                    options: [
+                                        {
+                                            name: "value",
+                                            displayName: "Gender",
+                                            values: [
+                                                {
+                                                    displayName: "Gender",
+                                                    name: "type",
+                                                    type: "options",
+                                                    options: [
+                                                        { name: "Male", value: "male" },
+                                                        { name: "Female", value: "female" },
+                                                    ],
+                                                    default: "female",
+                                                },
+                                                {
+                                                    displayName: "Minimum Percentage",
+                                                    name: "min_pct",
+                                                    type: "number",
+                                                    default: 50,
+                                                    description: "Minimum percentage of the audience that must match this gender",
+                                                    typeOptions: { minValue: 0, maxValue: 100 },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    displayName: "Audience Language",
+                                    name: "audience_language_picker",
+                                    type: "fixedCollection",
+                                    typeOptions: { multipleValues: true },
+                                    placeholder: "Add Language",
+                                    default: {},
+                                    description: "Filter creators whose Instagram followers speak these languages (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                    options: [
+                                        {
+                                            name: "values",
+                                            displayName: "Language",
+                                            values: [
+                                                {
+                                                    displayName: "Language",
+                                                    name: "language_abbr",
+                                                    type: "options",
+                                                    typeOptions: { loadOptionsMethod: "getLanguages" },
+                                                    default: "",
+                                                    description: "Select a language from the API dictionary",
+                                                },
+                                                {
+                                                    displayName: "Minimum Percentage",
+                                                    name: "min_pct",
+                                                    type: "number",
+                                                    default: 10,
+                                                    description: "Minimum percentage of the audience that must speak this language",
+                                                    typeOptions: { minValue: 0, maxValue: 100 },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    displayName: "Audience Age",
+                                    name: "audience_age_picker",
+                                    type: "fixedCollection",
+                                    typeOptions: { multipleValues: true },
+                                    placeholder: "Add Age Range",
+                                    default: {},
+                                    description: "Filter creators whose Instagram followers fall within these age ranges (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
+                                    options: [
+                                        {
+                                            name: "values",
+                                            displayName: "Age Range",
+                                            values: [
+                                                {
+                                                    displayName: "Age Range",
+                                                    name: "range",
+                                                    type: "options",
+                                                    options: [
+                                                        { name: "13–17", value: "13-17" },
+                                                        { name: "18–24", value: "18-24" },
+                                                        { name: "25–34", value: "25-34" },
+                                                        { name: "35–44", value: "35-44" },
+                                                        { name: "45–64", value: "45-64" },
+                                                        { name: "65+", value: "65+" },
+                                                        { name: "65– (legacy)", value: "65-" },
+                                                    ],
+                                                    default: "25-34",
+                                                },
+                                                {
+                                                    displayName: "Minimum Percentage",
+                                                    name: "min_pct",
+                                                    type: "number",
+                                                    default: 10,
+                                                    description: "Minimum percentage of the audience that must fall within this age range",
+                                                    typeOptions: { minValue: 0, maxValue: 100 },
+                                                },
+                                            ],
+                                        },
+                                    ],
+                                },
+                                {
+                                    displayName: "Audience Credibility",
+                                    name: "audience_credibility_picker",
+                                    type: "options",
+                                    options: [
+                                        { name: "(No filter)", value: "" },
+                                        { name: "Bad", value: "bad" },
+                                        { name: "Low", value: "low" },
+                                        { name: "Normal", value: "normal" },
+                                        { name: "Good", value: "good" },
+                                        { name: "High", value: "high" },
+                                        { name: "Best", value: "best" },
+                                    ],
                                     default: "",
-                                    description: "Comma-separated list of brands",
+                                    description: "Filter creators by the credibility score of their Instagram audience (e.g. proportion of real vs. bot followers) (Instagram only, 10k+ followers)",
+                                    displayOptions: {
+                                        show: {
+                                            "/platform": ["instagram"],
+                                        },
+                                    },
                                 },
                                 {
                                     displayName: "Exclude Role-Based Emails",
@@ -1143,10 +1621,11 @@ class InfluencersClub {
                                 // CONTENT Row 1: Topics, Keywords in Video Description, Keywords in Video Titles, Hashtags
                                 {
                                     displayName: "Topics",
-                                    name: "topics",
-                                    type: "string",
-                                    default: "",
-                                    description: "Comma-separated topics",
+                                    name: "topics_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getYtTopics" },
+                                    description: "Pick YouTube topics from the API's official dictionary",
                                 },
                                 {
                                     displayName: "Keywords in Video Description",
@@ -1866,10 +2345,11 @@ class InfluencersClub {
                                 },
                                 {
                                     displayName: "Games Played",
-                                    name: "games_played",
-                                    type: "string",
-                                    default: "",
-                                    description: "Comma-separated game names",
+                                    name: "games_played_picker",
+                                    type: "multiOptions",
+                                    default: [],
+                                    typeOptions: { loadOptionsMethod: "getGames" },
+                                    description: "Pick Twitch games from the API's official dictionary",
                                 },
                                 // Additional (execute supports these)
                                 {
@@ -1898,14 +2378,226 @@ class InfluencersClub {
                 // Find Lookalikes parameters (moved earlier for order)
             ],
         };
+        this.methods = {
+            loadOptions: {
+                async getLanguages() {
+                    var _a;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/languages/",
+                        json: true,
+                    });
+                    const list = Array.isArray(response) ? response : (_a = response === null || response === void 0 ? void 0 : response.result) !== null && _a !== void 0 ? _a : [];
+                    return list
+                        .map((entry) => {
+                        var _a, _b;
+                        const item = entry;
+                        const value = (_a = item.abbreviation) !== null && _a !== void 0 ? _a : "";
+                        const name = (_b = item.language) !== null && _b !== void 0 ? _b : value;
+                        return { name, value };
+                    })
+                        .filter((opt) => opt.value)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getYtTopics() {
+                    var _a;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/yt-topics/",
+                        json: true,
+                    });
+                    const list = (Array.isArray(response) ? response : []);
+                    const options = [];
+                    for (const entry of list) {
+                        const parent = (_a = entry.topic_details) !== null && _a !== void 0 ? _a : "";
+                        if (parent)
+                            options.push({ name: parent, value: parent });
+                        const subs = entry.sub_topic_details;
+                        if (Array.isArray(subs)) {
+                            for (const sub of subs) {
+                                if (sub)
+                                    options.push({ name: `${parent ? parent + " — " : ""}${sub}`, value: sub });
+                            }
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getGames() {
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/games/",
+                        json: true,
+                    });
+                    const list = (Array.isArray(response) ? response : []);
+                    return list
+                        .filter((g) => typeof g === "string" && g.length > 0)
+                        .map((g) => ({ name: g, value: g }))
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getBrands() {
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/brands/",
+                        json: true,
+                    });
+                    const list = (Array.isArray(response) ? response : []);
+                    return list
+                        .map((entry) => {
+                        var _a, _b, _c;
+                        const fullName = (_a = entry.full_name) !== null && _a !== void 0 ? _a : "";
+                        const cleaned = (_b = entry.cleaned) !== null && _b !== void 0 ? _b : "";
+                        const username = (_c = entry.username) !== null && _c !== void 0 ? _c : "";
+                        const displayName = username ? `${fullName || cleaned} (@${username})` : (fullName || cleaned);
+                        const value = username || cleaned || fullName;
+                        return { name: displayName, value };
+                    })
+                        .filter((opt) => opt.value)
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getAudienceInterests() {
+                    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/audience-interests/",
+                        json: true,
+                    });
+                    const raw = Array.isArray(response)
+                        ? response
+                        : (_b = (_a = response === null || response === void 0 ? void 0 : response.result) !== null && _a !== void 0 ? _a : response === null || response === void 0 ? void 0 : response.data) !== null && _b !== void 0 ? _b : [];
+                    const options = [];
+                    for (const item of raw) {
+                        if (typeof item === "string") {
+                            if (item.length > 0)
+                                options.push({ name: item, value: item });
+                        }
+                        else if (item && typeof item === "object") {
+                            const entry = item;
+                            const value = (_g = (_f = (_e = (_d = (_c = entry.interest) !== null && _c !== void 0 ? _c : entry.value) !== null && _d !== void 0 ? _d : entry.name) !== null && _e !== void 0 ? _e : entry.cleaned) !== null && _f !== void 0 ? _f : entry.id) !== null && _g !== void 0 ? _g : "";
+                            const name = (_m = (_l = (_k = (_j = (_h = entry.label) !== null && _h !== void 0 ? _h : entry.display) !== null && _j !== void 0 ? _j : entry.interest) !== null && _k !== void 0 ? _k : entry.name) !== null && _l !== void 0 ? _l : entry.full_name) !== null && _m !== void 0 ? _m : value;
+                            if (value)
+                                options.push({ name, value });
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getAudienceLocations() {
+                    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/audience-locations/",
+                        json: true,
+                    });
+                    const raw = Array.isArray(response)
+                        ? response
+                        : (_b = (_a = response === null || response === void 0 ? void 0 : response.result) !== null && _a !== void 0 ? _a : response === null || response === void 0 ? void 0 : response.data) !== null && _b !== void 0 ? _b : [];
+                    const options = [];
+                    for (const item of raw) {
+                        if (typeof item === "string") {
+                            if (item.length > 0)
+                                options.push({ name: item, value: item });
+                        }
+                        else if (item && typeof item === "object") {
+                            const entry = item;
+                            const value = (_h = (_g = (_f = (_e = (_d = (_c = entry.location) !== null && _c !== void 0 ? _c : entry.value) !== null && _d !== void 0 ? _d : entry.name) !== null && _e !== void 0 ? _e : entry.cleaned) !== null && _f !== void 0 ? _f : entry.id) !== null && _g !== void 0 ? _g : entry.code) !== null && _h !== void 0 ? _h : "";
+                            const name = (_o = (_m = (_l = (_k = (_j = entry.label) !== null && _j !== void 0 ? _j : entry.display) !== null && _k !== void 0 ? _k : entry.location) !== null && _l !== void 0 ? _l : entry.name) !== null && _m !== void 0 ? _m : entry.full_name) !== null && _o !== void 0 ? _o : value;
+                            if (value)
+                                options.push({ name, value });
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getAudienceBrandNames() {
+                    var _a, _b, _c, _d, _e, _f;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/audience-brand-names/",
+                        json: true,
+                    });
+                    const raw = Array.isArray(response) ? response : [];
+                    const options = [];
+                    for (const item of raw) {
+                        if (typeof item === "string") {
+                            if (item.length > 0)
+                                options.push({ name: item, value: item });
+                        }
+                        else if (item && typeof item === "object") {
+                            const entry = item;
+                            const value = (_d = (_c = (_b = (_a = entry.username) !== null && _a !== void 0 ? _a : entry.cleaned) !== null && _b !== void 0 ? _b : entry.full_name) !== null && _c !== void 0 ? _c : entry.name) !== null && _d !== void 0 ? _d : "";
+                            const fullName = (_e = entry.full_name) !== null && _e !== void 0 ? _e : "";
+                            const username = (_f = entry.username) !== null && _f !== void 0 ? _f : "";
+                            const display = username && fullName ? `${fullName} (@${username})` : (fullName || username || value);
+                            if (value)
+                                options.push({ name: display, value });
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getAudienceBrandCategories() {
+                    var _a, _b, _c, _d, _e, _f, _g;
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: "https://api-dashboard.influencers.club/public/v1/discovery/classifier/audience-brand-categories/",
+                        json: true,
+                    });
+                    const raw = Array.isArray(response) ? response : [];
+                    const options = [];
+                    for (const item of raw) {
+                        if (typeof item === "string") {
+                            if (item.length > 0)
+                                options.push({ name: item, value: item });
+                        }
+                        else if (item && typeof item === "object") {
+                            const entry = item;
+                            const value = (_e = (_d = (_c = (_b = (_a = entry.name) !== null && _a !== void 0 ? _a : entry.value) !== null && _b !== void 0 ? _b : entry.category) !== null && _c !== void 0 ? _c : entry.cleaned) !== null && _d !== void 0 ? _d : entry.id) !== null && _e !== void 0 ? _e : "";
+                            const display = (_g = (_f = entry.label) !== null && _f !== void 0 ? _f : entry.name) !== null && _g !== void 0 ? _g : value;
+                            if (value)
+                                options.push({ name: display, value });
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+                async getLocations() {
+                    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+                    const platform = this.getCurrentNodeParameter("platform") || "instagram";
+                    const response = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", {
+                        method: "GET",
+                        url: `https://api-dashboard.influencers.club/public/v1/discovery/classifier/locations/${encodeURIComponent(platform)}/`,
+                        json: true,
+                    });
+                    const raw = Array.isArray(response)
+                        ? response
+                        : (_b = (_a = response === null || response === void 0 ? void 0 : response.result) !== null && _a !== void 0 ? _a : response === null || response === void 0 ? void 0 : response.data) !== null && _b !== void 0 ? _b : [];
+                    const options = [];
+                    for (const item of raw) {
+                        if (typeof item === "string") {
+                            if (item.length > 0)
+                                options.push({ name: item, value: item });
+                        }
+                        else if (item && typeof item === "object") {
+                            const entry = item;
+                            const value = (_g = (_f = (_e = (_d = (_c = entry.location) !== null && _c !== void 0 ? _c : entry.name) !== null && _d !== void 0 ? _d : entry.value) !== null && _e !== void 0 ? _e : entry.id) !== null && _f !== void 0 ? _f : entry.code) !== null && _g !== void 0 ? _g : "";
+                            const name = (_k = (_j = (_h = entry.label) !== null && _h !== void 0 ? _h : entry.display) !== null && _j !== void 0 ? _j : entry.name) !== null && _k !== void 0 ? _k : value;
+                            if (value)
+                                options.push({ name, value });
+                        }
+                    }
+                    return options.sort((a, b) => a.name.localeCompare(b.name));
+                },
+            },
+        };
     }
     static buildApiFilters(ctx, platform, itemIndex) {
-        var _a, _b, _c, _d, _e, _f;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
         const getParam = (path, fallback = {}) => {
             const raw = ctx.getNodeParameter(path, itemIndex, fallback);
             return (Array.isArray(raw) && raw.length ? raw[0] : raw);
         };
-        const commaToArray = (v) => typeof v === "string" ? String(v).split(",").map((k) => k.trim()).filter(Boolean) : undefined;
+        const commaToArray = (v) => {
+            if (typeof v !== "string")
+                return undefined;
+            const arr = v.split(",").map((k) => k.trim()).filter(Boolean);
+            return arr.length > 0 ? arr : undefined;
+        };
         const sharedFilters = getParam("advancedFilters.filters");
         const instagramFilters = getParam("instagramFilters.values");
         const youtubeFilters = getParam("youtubeFilters.values");
@@ -1915,29 +2607,122 @@ class InfluencersClub {
         const twitchFilters = getParam("twitchFilters.values");
         const apiFilters = {};
         // Shared filters
-        if (sharedFilters.location && sharedFilters.location !== "")
-            apiFilters.location = commaToArray(sharedFilters.location);
+        const locationPicker = Array.isArray(sharedFilters.location_picker)
+            ? sharedFilters.location_picker.filter(Boolean)
+            : [];
+        if (locationPicker.length > 0)
+            apiFilters.location = locationPicker;
         if (sharedFilters.type && sharedFilters.type !== "" && ["instagram", "youtube", "tiktok"].includes(platform))
             apiFilters.type = sharedFilters.type;
         if (sharedFilters.gender && sharedFilters.gender !== "" && sharedFilters.type !== "business")
             apiFilters.gender = sharedFilters.gender;
-        if (sharedFilters.profile_language && sharedFilters.profile_language !== "")
-            apiFilters.profile_language = commaToArray(sharedFilters.profile_language);
-        if (sharedFilters.promotes_affiliate_links !== undefined)
+        const profileLanguagePicker = Array.isArray(sharedFilters.profile_language_picker)
+            ? sharedFilters.profile_language_picker.filter(Boolean)
+            : [];
+        if (profileLanguagePicker.length > 0) {
+            apiFilters.profile_language = profileLanguagePicker;
+        }
+        if (sharedFilters.promotes_affiliate_links === true)
             apiFilters.promotes_affiliate_links = sharedFilters.promotes_affiliate_links;
-        if (sharedFilters.has_done_brand_deals !== undefined)
+        if (sharedFilters.has_done_brand_deals === true)
             apiFilters.has_done_brand_deals = sharedFilters.has_done_brand_deals;
-        if (sharedFilters.has_link_in_bio !== undefined)
+        if (sharedFilters.has_link_in_bio === true)
             apiFilters.has_link_in_bio = sharedFilters.has_link_in_bio;
-        if (sharedFilters.does_live_streaming !== undefined)
+        if (sharedFilters.does_live_streaming === true)
             apiFilters.does_live_streaming = sharedFilters.does_live_streaming;
-        if (sharedFilters.has_merch !== undefined)
+        if (sharedFilters.has_merch === true)
             apiFilters.has_merch = sharedFilters.has_merch;
-        if (sharedFilters.brands && typeof sharedFilters.brands === "string")
-            apiFilters.brands = commaToArray(sharedFilters.brands);
-        if (sharedFilters.exclude_role_based_emails !== undefined)
+        const brandsPicker = Array.isArray(sharedFilters.brands_picker)
+            ? sharedFilters.brands_picker.filter(Boolean)
+            : [];
+        if (brandsPicker.length > 0)
+            apiFilters.brands = brandsPicker;
+        if (platform === "instagram") {
+            const audience = {};
+            const interestsRaw = (_a = sharedFilters.audience_interests_picker) === null || _a === void 0 ? void 0 : _a.values;
+            if (Array.isArray(interestsRaw) && interestsRaw.length > 0) {
+                const interests = interestsRaw
+                    .map((row) => {
+                    const name = ((row === null || row === void 0 ? void 0 : row.name) || "").trim();
+                    const min_pct = row === null || row === void 0 ? void 0 : row.min_pct;
+                    if (!name)
+                        return null;
+                    return { name, min_pct: typeof min_pct === "number" ? min_pct : null };
+                })
+                    .filter((x) => x !== null);
+                if (interests.length > 0)
+                    audience.interests = interests;
+            }
+            const locationsRaw = (_b = sharedFilters.audience_locations_picker) === null || _b === void 0 ? void 0 : _b.values;
+            if (Array.isArray(locationsRaw) && locationsRaw.length > 0) {
+                const locations = locationsRaw
+                    .map((row) => {
+                    const name = ((row === null || row === void 0 ? void 0 : row.name) || "").trim();
+                    const type = ((row === null || row === void 0 ? void 0 : row.type) || "country").trim();
+                    const min_pct = row === null || row === void 0 ? void 0 : row.min_pct;
+                    if (!name)
+                        return null;
+                    return { name, type, min_pct: typeof min_pct === "number" ? min_pct : null };
+                })
+                    .filter((x) => x !== null);
+                if (locations.length > 0)
+                    audience.location = locations;
+            }
+            const audienceBrands = Array.isArray(sharedFilters.audience_brands_picker)
+                ? sharedFilters.audience_brands_picker.filter(Boolean)
+                : [];
+            if (audienceBrands.length > 0)
+                audience.brands = audienceBrands;
+            const audienceBrandCategories = Array.isArray(sharedFilters.audience_brand_categories_picker)
+                ? sharedFilters.audience_brand_categories_picker.filter(Boolean)
+                : [];
+            if (audienceBrandCategories.length > 0)
+                audience.brand_categories = audienceBrandCategories;
+            const genderRaw = (_c = sharedFilters.audience_gender_picker) === null || _c === void 0 ? void 0 : _c.value;
+            if (genderRaw && typeof genderRaw === "object") {
+                const type = (genderRaw.type || "").trim();
+                const min_pct = genderRaw.min_pct;
+                if (type) {
+                    audience.gender = { type, min_pct: typeof min_pct === "number" ? min_pct : null };
+                }
+            }
+            const languageRaw = (_d = sharedFilters.audience_language_picker) === null || _d === void 0 ? void 0 : _d.values;
+            if (Array.isArray(languageRaw) && languageRaw.length > 0) {
+                const languages = languageRaw
+                    .map((row) => {
+                    const language_abbr = ((row === null || row === void 0 ? void 0 : row.language_abbr) || "").trim();
+                    const min_pct = row === null || row === void 0 ? void 0 : row.min_pct;
+                    if (!language_abbr)
+                        return null;
+                    return { language_abbr, min_pct: typeof min_pct === "number" ? min_pct : null };
+                })
+                    .filter((x) => x !== null);
+                if (languages.length > 0)
+                    audience.language = languages;
+            }
+            const ageRaw = (_e = sharedFilters.audience_age_picker) === null || _e === void 0 ? void 0 : _e.values;
+            if (Array.isArray(ageRaw) && ageRaw.length > 0) {
+                const ages = ageRaw
+                    .map((row) => {
+                    const range = ((row === null || row === void 0 ? void 0 : row.range) || "").trim();
+                    const min_pct = row === null || row === void 0 ? void 0 : row.min_pct;
+                    if (!range)
+                        return null;
+                    return { range, min_pct: typeof min_pct === "number" ? min_pct : null };
+                })
+                    .filter((x) => x !== null);
+                if (ages.length > 0)
+                    audience.age = ages;
+            }
+            const credibility = sharedFilters.audience_credibility_picker || "";
+            if (credibility)
+                audience.credibility = credibility;
+            if (Object.keys(audience).length > 0)
+                apiFilters.audience = audience;
+        }
+        if (sharedFilters.exclude_role_based_emails === true)
             apiFilters.exclude_role_based_emails = sharedFilters.exclude_role_based_emails;
-        if (sharedFilters.exclude_previous !== undefined)
+        if (sharedFilters.exclude_previous === true)
             apiFilters.exclude_previous = sharedFilters.exclude_previous;
         const creatorHas = ctx.getNodeParameter("advancedFilters.filters.creator_has.platforms", itemIndex, []);
         if (creatorHas && Array.isArray(creatorHas) && creatorHas.length) {
@@ -1954,8 +2739,8 @@ class InfluencersClub {
                 apiFilters.number_of_followers = { min: instagramFilters.min_followers || null, max: instagramFilters.max_followers || null };
             if (instagramFilters.posting_frequency)
                 apiFilters.posting_frequency = instagramFilters.posting_frequency;
-            if (instagramFilters.follower_growth_percentage || instagramFilters.follower_growth_time_range_months)
-                apiFilters.follower_growth = { growth_percentage: instagramFilters.follower_growth_percentage || null, time_range_months: instagramFilters.follower_growth_time_range_months || 3 };
+            if (instagramFilters.follower_growth_percentage)
+                apiFilters.follower_growth = { growth_percentage: instagramFilters.follower_growth_percentage, time_range_months: instagramFilters.follower_growth_time_range_months || 3 };
             if (instagramFilters.min_number_of_posts || instagramFilters.max_number_of_posts)
                 apiFilters.number_of_posts = { min: instagramFilters.min_number_of_posts || null, max: instagramFilters.max_number_of_posts || null };
             if (instagramFilters.min_average_likes || instagramFilters.max_average_likes)
@@ -1970,11 +2755,11 @@ class InfluencersClub {
                 apiFilters.income = { min: instagramFilters.min_income || null, max: instagramFilters.max_income || null };
             if (instagramFilters.min_video_percentage || instagramFilters.max_video_percentage)
                 apiFilters.video_percentage = { min: instagramFilters.min_video_percentage || null, max: instagramFilters.max_video_percentage || null };
-            if (instagramFilters.exclude_private_profile !== undefined)
+            if (instagramFilters.exclude_private_profile === true)
                 apiFilters.exclude_private_profile = instagramFilters.exclude_private_profile;
-            if (instagramFilters.is_verified !== undefined)
+            if (instagramFilters.is_verified === true)
                 apiFilters.is_verified = instagramFilters.is_verified;
-            if (instagramFilters.has_videos !== undefined)
+            if (instagramFilters.has_videos === true)
                 apiFilters.has_videos = instagramFilters.has_videos;
             if (instagramFilters.last_post)
                 apiFilters.last_post = instagramFilters.last_post;
@@ -1994,14 +2779,17 @@ class InfluencersClub {
                 apiFilters.keywords_in_captions = commaToArray(instagramFilters.keywords_in_captions);
             if (instagramFilters.engagement_percent_min || instagramFilters.engagement_percent_max)
                 apiFilters.engagement_percent = { min: instagramFilters.engagement_percent_min || null, max: instagramFilters.engagement_percent_max || null };
-            if (instagramFilters.has_merch !== undefined)
+            if (instagramFilters.has_merch === true)
                 apiFilters.has_merch = instagramFilters.has_merch;
         }
         if (platform === "youtube") {
             if (youtubeFilters.min_subscribers || youtubeFilters.max_subscribers)
                 apiFilters.number_of_subscribers = { min: youtubeFilters.min_subscribers || null, max: youtubeFilters.max_subscribers || null };
-            if (commaToArray(youtubeFilters.topics))
-                apiFilters.topics = commaToArray(youtubeFilters.topics);
+            const ytTopicsPicker = Array.isArray(youtubeFilters.topics_picker)
+                ? youtubeFilters.topics_picker.filter(Boolean)
+                : [];
+            if (ytTopicsPicker.length > 0)
+                apiFilters.topics = ytTopicsPicker;
             if (commaToArray(youtubeFilters.keywords_in_video_titles))
                 apiFilters.keywords_in_video_titles = commaToArray(youtubeFilters.keywords_in_video_titles);
             if (commaToArray(youtubeFilters.keywords_in_description))
@@ -2022,35 +2810,35 @@ class InfluencersClub {
                 apiFilters.links_from_video_description = commaToArray(youtubeFilters.links_from_video_description);
             if (youtubeFilters.posting_frequency)
                 apiFilters.posting_frequency = youtubeFilters.posting_frequency;
-            if (youtubeFilters.subscriber_growth_percentage || youtubeFilters.subscriber_growth_time_range_months)
-                apiFilters.subscriber_growth = { growth_percentage: youtubeFilters.subscriber_growth_percentage || null, time_range_months: youtubeFilters.subscriber_growth_time_range_months || 3 };
-            if (youtubeFilters.has_shorts !== undefined)
+            if (youtubeFilters.subscriber_growth_percentage)
+                apiFilters.subscriber_growth = { growth_percentage: youtubeFilters.subscriber_growth_percentage, time_range_months: youtubeFilters.subscriber_growth_time_range_months || 3 };
+            if (youtubeFilters.has_shorts === true)
                 apiFilters.has_shorts = youtubeFilters.has_shorts;
             if (youtubeFilters.min_shorts_percentage || youtubeFilters.max_shorts_percentage)
                 apiFilters.shorts_percentage = { min: youtubeFilters.min_shorts_percentage || null, max: youtubeFilters.max_shorts_percentage || null };
             if (youtubeFilters.engagement_percent_min || youtubeFilters.engagement_percent_max)
                 apiFilters.engagement_percent = { min: youtubeFilters.engagement_percent_min || null, max: youtubeFilters.engagement_percent_max || null };
-            if (youtubeFilters.has_community_posts !== undefined)
+            if (youtubeFilters.has_community_posts === true)
                 apiFilters.has_community_posts = youtubeFilters.has_community_posts;
-            if (youtubeFilters.streams_live !== undefined)
+            if (youtubeFilters.streams_live === true)
                 apiFilters.streams_live = youtubeFilters.streams_live;
-            if (youtubeFilters.has_merch !== undefined)
+            if (youtubeFilters.has_merch === true)
                 apiFilters.has_merch = youtubeFilters.has_merch;
-            if (youtubeFilters.has_podcast !== undefined)
+            if (youtubeFilters.has_podcast === true)
                 apiFilters.has_podcast = youtubeFilters.has_podcast;
-            if (youtubeFilters.has_courses !== undefined)
+            if (youtubeFilters.has_courses === true)
                 apiFilters.has_courses = youtubeFilters.has_courses;
-            if (youtubeFilters.has_membership !== undefined)
+            if (youtubeFilters.has_membership === true)
                 apiFilters.has_membership = youtubeFilters.has_membership;
             if (youtubeFilters.min_average_views_on_long_videos || youtubeFilters.max_average_views_on_long_videos)
                 apiFilters.average_views_on_long_videos = { min: youtubeFilters.min_average_views_on_long_videos || null, max: youtubeFilters.max_average_views_on_long_videos || null };
             if (youtubeFilters.long_video_duration_min != null || youtubeFilters.long_video_duration_max != null)
-                apiFilters.long_video_duration = { min: (_a = youtubeFilters.long_video_duration_min) !== null && _a !== void 0 ? _a : null, max: (_b = youtubeFilters.long_video_duration_max) !== null && _b !== void 0 ? _b : null };
+                apiFilters.long_video_duration = { min: (_f = youtubeFilters.long_video_duration_min) !== null && _f !== void 0 ? _f : null, max: (_g = youtubeFilters.long_video_duration_max) !== null && _g !== void 0 ? _g : null };
             if (youtubeFilters.min_average_views_on_shorts || youtubeFilters.max_average_views_on_shorts)
                 apiFilters.average_views_on_shorts = { min: youtubeFilters.min_average_views_on_shorts || null, max: youtubeFilters.max_average_views_on_shorts || null };
             if (youtubeFilters.min_number_of_videos || youtubeFilters.max_number_of_videos)
                 apiFilters.number_of_videos = { min: youtubeFilters.min_number_of_videos || null, max: youtubeFilters.max_number_of_videos || null };
-            if (youtubeFilters.is_monetizing !== undefined)
+            if (youtubeFilters.is_monetizing === true)
                 apiFilters.is_monetizing = youtubeFilters.is_monetizing;
             if (commaToArray(youtubeFilters.similar_to))
                 apiFilters.similar_to = commaToArray(youtubeFilters.similar_to);
@@ -2065,8 +2853,8 @@ class InfluencersClub {
             if (youtubeFilters.average_stream_views_min || youtubeFilters.average_stream_views_max)
                 apiFilters.average_stream_views = { min: youtubeFilters.average_stream_views_min || null, max: youtubeFilters.average_stream_views_max || null };
             if (youtubeFilters.average_stream_duration_min != null || youtubeFilters.average_stream_duration_max != null)
-                apiFilters.average_stream_duration = { min: (_c = youtubeFilters.average_stream_duration_min) !== null && _c !== void 0 ? _c : null, max: (_d = youtubeFilters.average_stream_duration_max) !== null && _d !== void 0 ? _d : null };
-            if (youtubeFilters.is_verified !== undefined)
+                apiFilters.average_stream_duration = { min: (_h = youtubeFilters.average_stream_duration_min) !== null && _h !== void 0 ? _h : null, max: (_j = youtubeFilters.average_stream_duration_max) !== null && _j !== void 0 ? _j : null };
+            if (youtubeFilters.is_verified === true)
                 apiFilters.is_verified = youtubeFilters.is_verified;
         }
         if (platform === "tiktok") {
@@ -2074,8 +2862,8 @@ class InfluencersClub {
                 apiFilters.number_of_followers = { min: tiktokFilters.number_of_followers_min || null, max: tiktokFilters.number_of_followers_max || null };
             if (tiktokFilters.posting_frequency)
                 apiFilters.posting_frequency = tiktokFilters.posting_frequency;
-            if (tiktokFilters.follower_growth_percentage || tiktokFilters.follower_growth_time_range_months)
-                apiFilters.follower_growth = { growth_percentage: tiktokFilters.follower_growth_percentage || null, time_range_months: tiktokFilters.follower_growth_time_range_months || 3 };
+            if (tiktokFilters.follower_growth_percentage)
+                apiFilters.follower_growth = { growth_percentage: tiktokFilters.follower_growth_percentage, time_range_months: tiktokFilters.follower_growth_time_range_months || 3 };
             if (tiktokFilters.average_likes_min || tiktokFilters.average_likes_max)
                 apiFilters.average_likes = { min: tiktokFilters.average_likes_min || null, max: tiktokFilters.average_likes_max || null };
             if (tiktokFilters.average_comments_min || tiktokFilters.average_comments_max)
@@ -2088,11 +2876,11 @@ class InfluencersClub {
                 apiFilters.average_video_downloads = { min: tiktokFilters.average_video_downloads_min || null, max: tiktokFilters.average_video_downloads_max || null };
             if (tiktokFilters.video_count_min || tiktokFilters.video_count_max)
                 apiFilters.video_count = { min: tiktokFilters.video_count_min || null, max: tiktokFilters.video_count_max || null };
-            if (tiktokFilters.has_tik_tok_shop !== undefined)
+            if (tiktokFilters.has_tik_tok_shop === true)
                 apiFilters.has_tik_tok_shop = tiktokFilters.has_tik_tok_shop;
-            if (tiktokFilters.exclude_private_profile !== undefined)
+            if (tiktokFilters.exclude_private_profile === true)
                 apiFilters.exclude_private_profile = tiktokFilters.exclude_private_profile;
-            if (tiktokFilters.is_verified !== undefined)
+            if (tiktokFilters.is_verified === true)
                 apiFilters.is_verified = tiktokFilters.is_verified;
             if (commaToArray(tiktokFilters.similar_to))
                 apiFilters.similar_to = commaToArray(tiktokFilters.similar_to);
@@ -2119,7 +2907,7 @@ class InfluencersClub {
             if (twitterFilters.engagement_percent_min || twitterFilters.engagement_percent_max)
                 apiFilters.engagement_percent = { min: twitterFilters.engagement_percent_min || null, max: twitterFilters.engagement_percent_max || null };
             if (twitterFilters.min_number_of_tweets != null || twitterFilters.max_number_of_tweets != null)
-                apiFilters.number_of_tweets = { min: (_e = twitterFilters.min_number_of_tweets) !== null && _e !== void 0 ? _e : null, max: (_f = twitterFilters.max_number_of_tweets) !== null && _f !== void 0 ? _f : null };
+                apiFilters.number_of_tweets = { min: (_k = twitterFilters.min_number_of_tweets) !== null && _k !== void 0 ? _k : null, max: (_l = twitterFilters.max_number_of_tweets) !== null && _l !== void 0 ? _l : null };
             if (twitterFilters.average_likes_min || twitterFilters.average_likes_max)
                 apiFilters.average_likes = { min: twitterFilters.average_likes_min || null, max: twitterFilters.average_likes_max || null };
             if (twitterFilters.last_post)
@@ -2150,13 +2938,13 @@ class InfluencersClub {
                 apiFilters.last_active = onlyfansFilters.last_active;
             if (commaToArray(onlyfansFilters.similar_to))
                 apiFilters.similar_to = commaToArray(onlyfansFilters.similar_to);
-            if (onlyfansFilters.has_videos !== undefined)
+            if (onlyfansFilters.has_videos === true)
                 apiFilters.has_videos = onlyfansFilters.has_videos;
-            if (onlyfansFilters.has_free_account !== undefined)
+            if (onlyfansFilters.has_free_account === true)
                 apiFilters.has_free_account = onlyfansFilters.has_free_account;
-            if (onlyfansFilters.has_live_streams !== undefined)
+            if (onlyfansFilters.has_live_streams === true)
                 apiFilters.has_live_streams = onlyfansFilters.has_live_streams;
-            if (onlyfansFilters.is_verified !== undefined)
+            if (onlyfansFilters.is_verified === true)
                 apiFilters.is_verified = onlyfansFilters.is_verified;
         }
         if (platform === "twitch") {
@@ -2170,9 +2958,12 @@ class InfluencersClub {
                 apiFilters.avg_views_last_30_days = { min: twitchFilters.min_avg_views_last_30_days || null, max: twitchFilters.max_avg_views_last_30_days || null };
             if (twitchFilters.min_streams_count_last_30_days || twitchFilters.max_streams_count_last_30_days)
                 apiFilters.streams_count_last_30_days = { min: twitchFilters.min_streams_count_last_30_days || null, max: twitchFilters.max_streams_count_last_30_days || null };
-            if (commaToArray(twitchFilters.games_played))
-                apiFilters.games_played = commaToArray(twitchFilters.games_played);
-            if (twitchFilters.is_twitch_partner !== undefined)
+            const twitchGamesPicker = Array.isArray(twitchFilters.games_played_picker)
+                ? twitchFilters.games_played_picker.filter(Boolean)
+                : [];
+            if (twitchGamesPicker.length > 0)
+                apiFilters.games_played = twitchGamesPicker;
+            if (twitchFilters.is_twitch_partner === true)
                 apiFilters.is_twitch_partner = twitchFilters.is_twitch_partner;
             if (commaToArray(twitchFilters.keywords_in_description))
                 apiFilters.keywords_in_description = commaToArray(twitchFilters.keywords_in_description);
@@ -2184,7 +2975,7 @@ class InfluencersClub {
         return apiFilters;
     }
     async execute() {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         const items = this.getInputData();
         const outputItems = [];
         const nodeParams = this.getNode().parameters;
@@ -2213,11 +3004,13 @@ class InfluencersClub {
                         const platform = this.getNodeParameter("platform", itemIndex);
                         // Optional fields from Additional Options (fallback to legacy top-level for backward compat)
                         const include_lookalikes = (_b = (_a = additionalOptions.include_lookalikes) !== null && _a !== void 0 ? _a : nodeParams.include_lookalikes) !== null && _b !== void 0 ? _b : false;
+                        const include_audience_data = this.getNodeParameter("include_audience_data", itemIndex, false);
                         const email_required = (_d = (_c = additionalOptions.email_required) !== null && _c !== void 0 ? _c : nodeParams.email_required) !== null && _d !== void 0 ? _d : "preferred";
                         const body = {
                             handle,
                             platform,
                             include_lookalikes,
+                            include_audience_data,
                             email_required,
                         };
                         const options = {
@@ -2350,28 +3143,8 @@ class InfluencersClub {
                                 "X-Integration": "influencers-n8n",
                             },
                         };
-                        try {
-                            const resp = await this.helpers.httpRequest(options);
-                            outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
-                        }
-                        catch (batchError) {
-                            const axiosErr = batchError;
-                            outputItems.push({
-                                json: {
-                                    _debug_fileName: fileName,
-                                    _debug_fileSize: csvBuffer.length,
-                                    _debug_csvPreview: csvBuffer.toString("utf-8").substring(0, 300),
-                                    _debug_enrichmentMode: enrichmentMode,
-                                    _debug_platform: batchPlatform || "(none)",
-                                    _debug_contentType: form.getHeaders()["content-type"],
-                                    _error_message: (_l = axiosErr.message) !== null && _l !== void 0 ? _l : "unknown",
-                                    _error_status: (_o = (_m = axiosErr.response) === null || _m === void 0 ? void 0 : _m.status) !== null && _o !== void 0 ? _o : "",
-                                    _error_response_body: (_q = (_p = axiosErr.response) === null || _p === void 0 ? void 0 : _p.data) !== null && _q !== void 0 ? _q : "no response body",
-                                    _error_response_headers: (_s = (_r = axiosErr.response) === null || _r === void 0 ? void 0 : _r.headers) !== null && _s !== void 0 ? _s : "",
-                                },
-                                pairedItem: { item: itemIndex },
-                            });
-                        }
+                        const resp = await this.helpers.httpRequest(options);
+                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
                         break;
                     }
                     case "getBatchStatus": {
@@ -2387,13 +3160,49 @@ class InfluencersClub {
                     }
                     case "downloadBatchResults": {
                         const batchId = this.getNodeParameter("batch_id", itemIndex);
-                        const options = {
-                            method: "GET",
-                            url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/?format=csv`,
-                            json: true,
-                        };
-                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
-                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        const format = this.getNodeParameter("batch_download_format", itemIndex, "json");
+                        const encodedBatchId = encodeURIComponent(batchId);
+                        if (format === "url") {
+                            const options = {
+                                method: "GET",
+                                url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodedBatchId}/download/`,
+                                json: true,
+                            };
+                            const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                            outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        }
+                        else if (format === "csv") {
+                            const options = {
+                                method: "GET",
+                                url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodedBatchId}/?format=csv`,
+                                encoding: "arraybuffer",
+                                returnFullResponse: true,
+                            };
+                            const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                            const buffer = Buffer.from(resp.body);
+                            const binaryData = await this.helpers.prepareBinaryData(buffer, `batch-${batchId}.csv`, "text/csv");
+                            outputItems.push({
+                                json: { batch_id: batchId, format: "csv", size_bytes: buffer.length },
+                                binary: { data: binaryData },
+                                pairedItem: { item: itemIndex },
+                            });
+                        }
+                        else {
+                            const options = {
+                                method: "GET",
+                                url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodedBatchId}/?format=json`,
+                                json: true,
+                            };
+                            const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                            if (Array.isArray(resp)) {
+                                for (const record of resp) {
+                                    outputItems.push({ json: record, pairedItem: { item: itemIndex } });
+                                }
+                            }
+                            else {
+                                outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                            }
+                        }
                         break;
                     }
                     case "resumeBatch": {
@@ -2402,6 +3211,119 @@ class InfluencersClub {
                             method: "POST",
                             url: `https://api-dashboard.influencers.club/public/v1/enrichment/batch/${encodeURIComponent(batchId)}/resume/`,
                             body: {},
+                            json: true,
+                        };
+                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        break;
+                    }
+                    case "getSocials": {
+                        const handle = this.getNodeParameter("handle", itemIndex);
+                        const platform = this.getNodeParameter("platform", itemIndex);
+                        const body = { handle, platform };
+                        const options = {
+                            method: "POST",
+                            url: "https://api-dashboard.influencers.club/public/v1/creators/socials/",
+                            body,
+                            json: true,
+                        };
+                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        break;
+                    }
+                    case "getPosts": {
+                        const handle = this.getNodeParameter("handle", itemIndex);
+                        const platform = this.getNodeParameter("video_platform", itemIndex);
+                        const returnAll = this.getNodeParameter("posts_return_all", itemIndex, false);
+                        const count = this.getNodeParameter("posts_count", itemIndex, 30);
+                        const aggregated = [];
+                        let pagination_token;
+                        let lastMeta = {};
+                        let totalCredits = 0;
+                        const maxPages = 50;
+                        for (let page = 0; page < maxPages; page++) {
+                            const body = { platform, handle, count };
+                            if (pagination_token)
+                                body.pagination_token = pagination_token;
+                            const options = {
+                                method: "POST",
+                                url: "https://api-dashboard.influencers.club/public/v1/creators/content/posts/",
+                                body,
+                                json: true,
+                            };
+                            const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                            totalCredits += (_l = resp.credits_cost) !== null && _l !== void 0 ? _l : 0;
+                            const result = ((_m = resp.result) !== null && _m !== void 0 ? _m : {});
+                            const pageItems = (_o = result.items) !== null && _o !== void 0 ? _o : [];
+                            aggregated.push(...pageItems);
+                            lastMeta = {
+                                num_results: aggregated.length,
+                                more_available: result.more_available,
+                                next_token: result.next_token,
+                                status: result.status,
+                            };
+                            const next = result.next_token;
+                            const more = result.more_available;
+                            if (!returnAll || !more || !next)
+                                break;
+                            pagination_token = next;
+                        }
+                        outputItems.push({
+                            json: {
+                                credits_cost: totalCredits,
+                                result: { ...lastMeta, items: aggregated },
+                            },
+                            pairedItem: { item: itemIndex },
+                        });
+                        break;
+                    }
+                    case "getPostDetails": {
+                        const platform = this.getNodeParameter("video_platform", itemIndex);
+                        const post_id = this.getNodeParameter("post_id", itemIndex);
+                        const content_type = this.getNodeParameter("content_type", itemIndex);
+                        if (platform === "youtube" && content_type === "audio") {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), "YouTube does not support the \"audio\" content type. Choose data, comments, or transcript instead.", { itemIndex });
+                        }
+                        const body = { platform, content_type, post_id };
+                        if (content_type === "comments") {
+                            const token = this.getNodeParameter("details_pagination_token", itemIndex, "");
+                            if (token)
+                                body.pagination_token = token;
+                        }
+                        const options = {
+                            method: "POST",
+                            url: "https://api-dashboard.influencers.club/public/v1/creators/content/details/",
+                            body,
+                            json: true,
+                        };
+                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        break;
+                    }
+                    case "getCredits": {
+                        const options = {
+                            method: "GET",
+                            url: "https://api-dashboard.influencers.club/public/v1/accounts/credits/",
+                            json: true,
+                        };
+                        const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
+                        outputItems.push({ json: resp, pairedItem: { item: itemIndex } });
+                        break;
+                    }
+                    case "audienceOverlap": {
+                        const platform = this.getNodeParameter("video_platform", itemIndex);
+                        const creatorsRaw = this.getNodeParameter("overlap_creators.values", itemIndex, []);
+                        const creators = (Array.isArray(creatorsRaw) ? creatorsRaw : [])
+                            .map((c) => (c.handle || "").trim())
+                            .filter(Boolean);
+                        if (creators.length < 2 || creators.length > 10) {
+                            throw new n8n_workflow_1.NodeOperationError(this.getNode(), `Audience Overlap requires between 2 and 10 creator handles (got ${creators.length}).`, { itemIndex });
+                        }
+                        const body = { platform, creators };
+                        const options = {
+                            method: "POST",
+                            url: "https://api-dashboard.influencers.club/public/v1/creators/audience/overlap/",
+                            body,
                             json: true,
                         };
                         const resp = await this.helpers.httpRequestWithAuthentication.call(this, "influencersClubApi", options);
